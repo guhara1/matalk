@@ -87,7 +87,7 @@ def build_index():
 
     html = head(
         f"{C.BRAND_FULL} | 서울·경기·인천·부산 24시간 방문 건강관리",
-        f"{C.BRAND} 출장마사지 — 서울 25개구·경기 31개시군·인천·부산 전 권역 24시간 배차. 평균 {S['avg_arrival_min']}분 도착, 예약 시 확정 금액 그대로. 스웨디시·아로마·타이·로미로미·스포츠 코스 안내.",
+        f"{C.BRAND} 출장마사지 — 서울·경기·인천·부산 전 권역 24시간 배차. 평균 {S['avg_arrival_min']}분 도착, 확정 금액 그대로.",
         "/", jsonld_blocks=blocks, prefetch=["/pricing/", "/locations/"],
         extra_meta=(
             '<meta name="naver-site-verification" content="30363baba6fc86ad2bb4e417ae432a7accb60d1e">'
@@ -168,7 +168,7 @@ def build_services():
         "itemListElement": [{"@type": "ListItem", "position": i, "name": s["name"],
                              "url": C.DOMAIN + f"/service/{s['slug']}/"} for i, s in enumerate(D.SERVICES, 1)]})]
     html = head("출장마사지 코스 안내 — 스웨디시·아로마·타이·로미로미·스포츠 | 마톡",
-                "마톡 출장마사지의 5종 코스를 컨디션과 목적별로 안내합니다. 스웨디시·아로마·타이·로미로미·스포츠 코스의 특징과 추천 대상, 시간별 요금을 확인하세요.",
+                "마톡 5종 출장마사지 코스 안내 — 스웨디시·아로마·타이·로미로미·스포츠의 특징과 시간별 요금.",
                 "/service/", jsonld_blocks=blocks)
     html += header()
     html += f"""<section class="hero hero-compact">{''}
@@ -223,7 +223,7 @@ def build_services():
                                 "priceCurrency": "KRW"} for t, p in s["prices"]]}),
         ]
         html = head(f"{s['name']} 출장마사지 — 코스 특징·추천·요금 | 마톡",
-                    f"{s['name']} 출장마사지 안내. {s['summary']} 60·90·120분 요금과 추천 대상, 안전 기준을 확인하세요. 서울·경기·인천·부산 24시간 배차.",
+                    f"{s['name']} 출장마사지 — 60·90·120분 요금과 추천 대상, 안전 기준 안내. 수도권·부산 24시간 배차.",
                     f"/service/{s['slug']}/", jsonld_blocks=blocks, prefetch=["/pricing/"])
         html += header()
         html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
@@ -258,7 +258,7 @@ def build_therapists():
     trail = [("홈", "/"), ("관리사", None)]
     blocks = [breadcrumb_jsonld(trail)]
     html = head("관리사 안내 — 국적별 강점과 매칭 기준 | 마톡 출장마사지",
-                "마톡 출장마사지 관리사 안내. 한국·중국·태국·베트남·러시아·일본 국적별 강점과 코스별 매칭 기준을 확인하세요. 모든 관리사는 신원 확인과 안전 교육을 이수합니다.",
+                "마톡 출장마사지 관리사 안내 — 한국·중국·태국·베트남·러시아·일본 국적별 강점과 코스 매칭 기준.",
                 "/therapists/", jsonld_blocks=blocks)
     html += header()
     html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
@@ -293,7 +293,7 @@ def build_therapists():
         ]
         blocks = [breadcrumb_jsonld(trail), faq_jsonld(faq)]
         html = head(f"{t['name']}인 관리사 안내 — 강점·매칭 | 마톡 출장마사지",
-                    f"{t['name']}인 관리사 안내. {t['desc']} 코스별 매칭 기준과 공통 안전 기준을 확인하세요.",
+                    f"{t['name']}인 관리사 안내. {t['desc']} 코스별 매칭 기준을 확인하세요.",
                     f"/therapists/{t['slug']}/", jsonld_blocks=blocks)
         html += header()
         html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
@@ -337,7 +337,7 @@ def build_pricing():
                                            "price": p.replace(",", "").replace("원", ""), "priceCurrency": "KRW"}
                                           for s in D.SERVICES for t, p in s["prices"]]})]
     html = head("요금 안내 — 코스별 60·90·120분 가격 | 마톡 출장마사지",
-                "마톡 출장마사지 요금 안내. 스웨디시·아로마·타이·로미로미·스포츠 코스의 60·90·120분 가격을 확인하세요. 예약 시 확정 금액 그대로, 추가 비용 없음.",
+                "마톡 출장마사지 요금 — 5종 코스 60·90·120분 가격. 확정 금액 그대로, 추가 비용 없음.",
                 "/pricing/", jsonld_blocks=blocks)
     html += header()
     html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}

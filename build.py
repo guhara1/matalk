@@ -97,6 +97,7 @@ def robots_txt():
         body
         + f"Sitemap: {C.DOMAIN}/sitemap.xml\n"
         + f"Sitemap: {C.DOMAIN}/sitemap1.xml\n"
+        + f"Sitemap: {C.DOMAIN}/sitemap_01.xml\n"
         + f"Sitemap: {C.DOMAIN}/rss.xml\n"
         + f"Host: {host}\n"
     )
@@ -235,6 +236,7 @@ def main():
         "robots.txt": robots_txt(),
         "sitemap.xml": sitemap_index(),
         "sitemap1.xml": sitemap_urlset(sorted(set(written))),
+        "sitemap_01.xml": sitemap_urlset(sorted(set(written))),  # 구글 제출용
         "rss.xml": rss_xml(),
         "site.webmanifest": webmanifest(),
         "favicon.svg": favicon_svg(),

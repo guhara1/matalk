@@ -33,7 +33,7 @@ def build_locations_hub():
                                            "url": C.DOMAIN + f"/locations/{r['slug']}/"} for i, r in enumerate(D.REGIONS, 1)]})]
     total = sum(len(r["districts"]) for r in D.REGIONS)
     html = head("지역별 출장마사지 — 서울·경기·인천·부산 전 권역 | 마톡",
-                f"마톡 출장마사지 지역 안내. 서울 25개구·경기 31개 시군·인천 10개·부산 16개, 총 {total}개 권역에 24시간 배차합니다. 원하는 시·군·구를 선택하세요.",
+                f"마톡 출장마사지 지역 안내 — 서울·경기·인천·부산 총 {total}개 권역 24시간 배차. 시·군·구를 선택하세요.",
                 "/locations/", jsonld_blocks=blocks)
     html += header()
     html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
@@ -50,19 +50,19 @@ def build_locations_hub():
 _REGION_META = {
     "seoul": (
         "서울 출장마사지 — 25개 자치구 심야 방문관리 | 마톡",
-        "서울 25개 자치구 어디든 평균 30분대 방문하는 출장마사지. 강남·마포·송파부터 노원·은평까지 도심 야간 수요에 맞춰 24시간 배차하며, 자치구별 동 도착시간과 코스 요금을 안내합니다.",
+        "서울 25개 자치구 평균 30분대 방문 출장마사지. 강남·마포·송파 등 야간 24시간 배차, 정찰 요금.",
     ),
     "gyeonggi": (
         "경기 출장마사지 | 31개 시·군 광역 24시간 배차 — 마톡",
-        "수원·성남·고양·용인 등 경기 31개 시·군을 아우르는 방문 마사지. 신도시·외곽까지 권역별 대기 배치로 도착시간을 관리하며, 시·군별 페이지에서 동 도착 데이터와 정찰 요금을 확인할 수 있습니다.",
+        "수원·성남·고양·용인 등 경기 31개 시·군 방문 마사지. 신도시·외곽까지 24시간 배차, 정찰 요금.",
     ),
     "incheon": (
         "인천 출장마사지 — 송도·청라·공항권 방문관리 | 마톡",
-        "송도·청라 신도시부터 공항·원도심까지 인천 10개 군·구 전역 출장마사지. 권역마다 다른 동선에 맞춰 24시간 검증 관리사를 배차하고, 구별 평균 도착시간과 코스 요금을 투명하게 제공합니다.",
+        "송도·청라부터 공항·원도심까지 인천 10개 군·구 출장마사지. 24시간 배차, 구별 도착시간 안내.",
     ),
     "busan": (
         "부산 출장마사지 | 해운대·서면 등 16개 군·구 24시 — 마톡",
-        "해운대·서면·광안리를 비롯한 부산 16개 군·구 방문 마사지. 해안 관광권과 주거권의 야간 수요에 맞춰 연중무휴 배차하며, 구별 동 도착시간·실후기·정찰 요금을 한곳에 정리했습니다.",
+        "해운대·서면·광안리 등 부산 16개 군·구 방문 마사지. 연중무휴 배차, 구별 도착시간·정찰 요금.",
     ),
 }
 
@@ -222,7 +222,7 @@ def build_magazine():
         for m in D.MAGAZINE)
     blocks = [breadcrumb_jsonld(trail)]
     html = head("매거진 — 출장마사지 가이드와 운영 데이터 | 마톡",
-                "마톡 매거진. 코스 선택법, 권역별 도착 시간 데이터 분석, 안전 예약 가이드 등 직접 운영 데이터에 기반한 글을 제공합니다.",
+                "마톡 매거진 — 코스 선택법, 권역별 도착시간 분석, 안전 예약 가이드 등 운영 데이터 기반 글.",
                 "/magazine/", jsonld_blocks=blocks)
     html += header()
     html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
@@ -385,7 +385,7 @@ def build_reviews():
                       "itemReviewed": {"@type": "Organization", "name": C.BRAND_FULL},
                       "ratingValue": S["rating"], "reviewCount": S["review_count"], "bestRating": "5"})]
     html = head("이용 후기 — 실제 고객 평점 4.96 | 마톡 출장마사지",
-                f"마톡 출장마사지 이용 후기. 서울·경기·인천·부산 실제 고객이 남긴 후기 {S['review_count']:,}건, 평균 평점 {S['rating']}점. 권역별 생생한 이용 경험을 확인하세요.",
+                f"마톡 출장마사지 이용 후기 — 서울·경기·인천·부산 고객 후기 {S['review_count']:,}건, 평균 평점 {S['rating']}점.",
                 "/reviews/", jsonld_blocks=blocks)
     html += header()
     html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
@@ -428,7 +428,7 @@ def build_about():
               jsonld({"@context": "https://schema.org", "@graph": [org_jsonld(),
                       {"@type": "AboutPage", "name": f"{C.BRAND_FULL} 소개", "url": C.DOMAIN + "/about/"}]})]
     html = head("회사 소개 — 운영팀·편집 정책·연락처 | 마톡 출장마사지",
-                "마톡 출장마사지 회사 소개. 운영팀장과 안전 자문 트레이너의 실명·책임 영역, 편집 정책, 연락처를 공개합니다. 본사 디스패치 기반 자체 운영.",
+                "마톡 출장마사지 회사 소개 — 운영팀·안전 자문 트레이너 실명, 편집 정책, 연락처 공개.",
                 "/about/", jsonld_blocks=blocks)
     html += header()
     html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
