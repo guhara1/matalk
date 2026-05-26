@@ -126,16 +126,16 @@ def sitemap_urlset(paths):
         items += (f"<url><loc>{C.DOMAIN}{p}</loc><lastmod>{today}</lastmod>"
                   f"<changefreq>{freq}</changefreq><priority>{pr}</priority></url>")
     return ('<?xml version="1.0" encoding="UTF-8"?>'
-            '<urlset xmlns="http://www.w3.org/2000/sitemaps/0.9">' + items + "</urlset>")
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + items + "</urlset>")
 
 
 def sitemap_index():
     """사이트맵 인덱스 (sitemap.xml) — 하위 사이트맵을 가리킴."""
     today = date.today().isoformat()
-    subs = [f"{C.DOMAIN}/sitemap1.xml", f"{C.DOMAIN}/rss.xml"]
+    subs = [f"{C.DOMAIN}/sitemap1.xml"]
     items = "".join(f"<sitemap><loc>{u}</loc><lastmod>{today}</lastmod></sitemap>" for u in subs)
     return ('<?xml version="1.0" encoding="UTF-8"?>'
-            '<sitemapindex xmlns="http://www.w3.org/2000/sitemaps/0.9">' + items + "</sitemapindex>")
+            '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + items + "</sitemapindex>")
 
 
 def _rfc822(d):
