@@ -22,18 +22,41 @@ def _grad(t):
     return _lerp(G_MID, G_OUT, (t - 0.55) / 0.45)
 
 
+def _seg_dist(px, py, ax, ay, bx, by):
+    """점(px,py)에서 선분 (ax,ay)-(bx,by) 까지의 거리."""
+    dx, dy = bx - ax, by - ay
+    seg2 = dx * dx + dy * dy
+    if seg2 == 0:
+        return math.hypot(px - ax, py - ay)
+    t = ((px - ax) * dx + (py - ay) * dy) / seg2
+    t = max(0.0, min(1.0, t))
+    return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+
+
+def _in_monogram(fx, fy):
+    """프랙션 좌표(0~1)가 'M' 모노그램 획 안에 있는지."""
+    left, right, top, bot = 0.32, 0.68, 0.35, 0.65
+    vx, vy = 0.50, 0.55          # 가운데 V 꼭짓점
+    hw = 0.052                   # 획 반폭
+    segs = (
+        (left, top, left, bot),      # 왼쪽 세로
+        (right, top, right, bot),     # 오른쪽 세로
+        (left, top, vx, vy),          # 왼쪽 사선
+        (right, top, vx, vy),         # 오른쪽 사선
+    )
+    return any(_seg_dist(fx, fy, *s) <= hw for s in segs)
+
+
 def _render(size, *, maskable=False):
-    """RGBA 바이트 생성. 라운드 다크 배경 위 그라데이션 원."""
+    """RGBA 바이트 생성. 라운드 다크 배경 위 그라데이션 원 + 다크 M 모노그램."""
     px = bytearray()
     cx = cy = size / 2
     r_circle = size * (0.46 if maskable else 0.40)
-    radius_bg = size * 0.22  # 라운드 코너 반경
-    # specular 하이라이트 중심 (좌상단)
-    hx, hy = size * 0.36, size * 0.30
+    radius_bg = size * 0.22
+    hx, hy = size * 0.36, size * 0.30  # specular 하이라이트 중심
     for y in range(size):
         row = bytearray([0])  # filter type 0
         for x in range(size):
-            # 라운드 사각 배경 알파
             inside_bg = True
             if not maskable:
                 dx = max(radius_bg - x, x - (size - radius_bg), 0)
@@ -44,10 +67,10 @@ def _render(size, *, maskable=False):
                 row += bytes([0, 0, 0, 0])
                 continue
             dist = math.hypot(x + 0.5 - cx, y + 0.5 - cy)
-            if dist <= r_circle:
+            fx, fy = (x + 0.5) / size, (y + 0.5) / size
+            if dist <= r_circle and not _in_monogram(fx, fy):
                 t = dist / r_circle
                 col = list(_grad(t))
-                # specular 하이라이트
                 hd = math.hypot(x - hx, y - hy)
                 hl = max(0.0, 1 - hd / (size * 0.4))
                 for i in range(3):
