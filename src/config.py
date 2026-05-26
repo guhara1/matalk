@@ -6,7 +6,7 @@ DOMAIN = "https://matalk.kr"
 BRAND = "마톡"
 BRAND_FULL = "마톡 출장마사지"
 BRAND_EN = "Matalk"
-LEGAL_NAME = "마톡"
+LEGAL_NAME = "YH LAB"
 
 # 연락처
 PHONE = "0508-202-4743"            # 표시용
@@ -14,14 +14,14 @@ PHONE_TEL = "+825082024743"        # tel: 링크용 (0508-202-4743)
 EMAIL = "help@matalk.kr"
 KAKAO = "@마톡"
 
-# 사업자 정보 (플레이스홀더 — 실제 발급값으로 교체)
+# 사업자 정보
 COMPANY = {
-    "name": "마톡",
-    "ceo": "[대표자명]",
-    "biz_no": "[사업자등록번호]",
-    "addr": "[사업장 주소]",
+    "name": "YH LAB",
+    "ceo": "김유환",
+    "biz_no": "815-26-00585",
+    "addr": "경기도 파주시 청석로 268",
     "mailorder_no": "[통신판매업신고번호]",
-    "privacy_officer": "[개인정보보호책임자]",
+    "privacy_officer": "김유환",
 }
 
 SOCIAL = {
