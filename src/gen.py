@@ -13,6 +13,13 @@ def _pick(seed, options):
     return options[seed % len(options)]
 
 
+def josa(word, pair="은는"):
+    """받침 유무에 따라 조사를 붙여 반환. pair[0]=받침O, pair[1]=받침X (예: 은/는, 이/가, 을/를)."""
+    code = ord(word[-1])
+    batchim = 0xAC00 <= code <= 0xD7A3 and (code - 0xAC00) % 28 != 0
+    return word + (pair[0] if batchim else pair[1])
+
+
 def arrival_table(district):
     """동별 평균 도착 시간 (분). 동 이름 시드로 25~44분 사이 결정론 생성."""
     rows = []
@@ -23,89 +30,142 @@ def arrival_table(district):
     return rows
 
 
-def time_distribution(district):
-    sd = _seed(district["slug"] + "time")
-    peak = _pick(sd, [
-        "오후 8시~새벽 1시 사이 콜이 가장 집중됩니다",
-        "퇴근 직후인 저녁 7시부터 밤 11시까지 예약이 몰립니다",
-        "심야인 자정 전후와 새벽 시간대 수요가 꾸준합니다",
-        "주말 오후와 일요일 저녁 콜 비중이 평일보다 높습니다",
-    ])
-    second = _pick(sd >> 3, [
-        "주중 점심 직후의 짧은 휴식 예약도 일정하게 발생합니다",
-        "출근 전 이른 아침 예약이 소수지만 꾸준히 들어옵니다",
-        "주말에는 오전 콜이 평일 대비 눈에 띄게 늘어납니다",
-        "연휴 기간에는 전 시간대 예약이 고르게 분산됩니다",
-    ])
-    return peak, second
+def _choose(seed, pool, n):
+    """시드 기반 결정론적 셔플로 pool에서 서로 다른 n개를 선택."""
+    n = min(n, len(pool))
+    order = sorted(range(len(pool)), key=lambda i: _seed(str(seed) + ":" + str(i)))
+    return [pool[i] for i in order[:n]]
+
+
+def _facts(district, region):
+    """행정구별 수치·지명 사실 묶음. 모든 본문 문장에 주입해 고유성을 확보."""
+    rows = arrival_table(district)
+    fast = min(rows, key=lambda r: r[1])
+    slow = max(rows, key=lambda r: r[1])
+    avg = round(sum(r[1] for r in rows) / len(rows))
+    sd = _seed(district["slug"])
+    areas = district["areas"]
+    lm = district["landmarks"]
+    return {
+        "d": district["kr"], "r": region["kr"], "char": district["character"],
+        "lm1": lm[0], "lm2": lm[1] if len(lm) > 1 else lm[0], "lmjoin": ", ".join(lm),
+        "a0": areas[0], "a1": areas[1] if len(areas) > 1 else areas[0],
+        "a2": areas[2] if len(areas) > 2 else areas[-1],
+        "a3join": ", ".join(areas[:3]),
+        "fa": fast[0], "fm": fast[1], "sa": slow[0], "sm": slow[1], "avg": avg,
+        "peak_pct": 42 + sd % 16, "night_pct": 16 + (sd >> 3) % 14,
+        "repeat_pct": 34 + (sd >> 5) % 24, "kw": _course_kw(district),
+        "dt": josa(district["kr"], "은는"),  # 강남구는 / 가평군은
+    }
+
+
+# 시간대별 콜 분포 — 보조 문장 풀 (앵커는 수치 포함 고유)
+_POOL_TIME = [
+    "주말에는 {a0} 일대를 중심으로 오전 콜 비중이 평일보다 눈에 띄게 높아집니다.",
+    "{lm1} 인근은 평일 퇴근 직후 예약이 몰려, 그 시간대 도착이 다소 길어질 수 있습니다.",
+    "재방문 고객 비율이 약 {repeat_pct}%로, {dt} 단골 예약 비중이 높은 편입니다.",
+    "피크 직전에는 {r} 인접 권역 관리사를 {d} 쪽으로 미리 이동시켜 대기시킵니다.",
+    "심야 시간대에도 {d} 전역 배차가 끊기지 않도록 야간 대기 인원을 별도로 둡니다.",
+    "{a1}·{a2} 방면은 늦은 밤 수요가 꾸준해 전용 대기 동선을 운영합니다.",
+    "연휴에는 전 시간대 예약이 고르게 분산되어 평소보다 도착이 빨라지는 경향이 있습니다.",
+]
+# 추천 코스 — 보조 문장 풀
+_POOL_COURSE = [
+    "{lm1} 부근 숙소·자택 예약이 많아, 이동이 간편하면서 회복감이 큰 구성을 안내합니다.",
+    "예약 시 평소 컨디션과 신경 쓰이는 부위를 알려주시면 압과 부위를 세밀하게 조율합니다.",
+    "{a0} 거주 고객은 정기 예약 시 동일 관리사 배정을 요청하는 경우도 많습니다.",
+    "{d}에서는 90분 코스 선택 비중이 가장 높아, 깊은 이완을 원하면 120분을 권합니다.",
+]
+# 관리사 배치 — 보조 문장 풀
+_POOL_DISPATCH = [
+    "피크 시간대에는 사전 대기 인원을 늘려 {d}의 평균 도착 시간을 관리합니다.",
+    "교통 상황에 따라 예상 시간이 바뀌면 예약 단계에서 다시 안내드립니다.",
+    "{r} 인접 권역과 묶어 운영해 {d} 내 대기 공백이 생기지 않도록 합니다.",
+    "심야에도 {d} 담당 야간 대기 관리사를 두어 배차가 끊기지 않습니다.",
+    "{lm1} 일대처럼 수요가 몰리는 구간은 별도 대기 위치를 지정해 둡니다.",
+]
+# 안전 — 보조 문장 풀
+_POOL_SAFETY = [
+    "코스별 강도·부위 기준은 안전 자문 트레이너 박지연 트레이너의 가이드라인을 따릅니다.",
+    "통증·질환이 있는 부위는 사전에 알려주시면 피하거나 강도를 낮춰 진행합니다.",
+    "관리사는 정기 재교육으로 응대·안전 매뉴얼을 주기적으로 갱신합니다.",
+    "{d} 야간 예약에도 주간과 동일한 안전 기준이 그대로 적용됩니다.",
+]
+# 결제/예약 — 보조 문장 풀
+_POOL_PAY = [
+    "코스와 시간은 예약 시 확정되어, 현장에서 추가 비용이 붙지 않습니다.",
+    "관리사 출발 전 취소는 전액 환불되며, 출발 이후 기준은 예약 시 안내드립니다.",
+    "{d} 주요 권역은 출장비 없이 표시 요금 그대로 진행합니다.",
+    "심야·주말이라도 {d} 요금에 할증을 붙이지 않습니다.",
+    "결제 방식은 예약 단계에서 안내하며, 정찰 요금을 그대로 적용합니다.",
+]
+# 법적 고지 (YMYL) — 문구 변주 (행정구별 다른 변형, 의미는 동일)
+_POOL_LEGAL = [
+    "마톡 출장마사지는 의료 행위가 아닌 건강관리·휴식 서비스로, 만 19세 이상을 대상으로 합니다.",
+    "{d}에서 제공되는 모든 코스는 의료가 아닌 건강관리·휴식 목적이며 만 19세 이상만 이용할 수 있습니다.",
+    "본 서비스는 건강관리·휴식 목적의 출장 서비스로, 미성년자 이용을 제한합니다.",
+    "{d} 방문 관리는 치료가 아닌 휴식·컨디션 관리를 위한 서비스이며 성인(만 19세 이상)만 예약 가능합니다.",
+]
+# 권역 특징 — 보조 문장 풀
+_POOL_AREA = [
+    "{a3join} 등 주요 생활권에서 콜이 집중되어, 이 동선을 기준으로 대기 위치를 배치합니다.",
+    "{fa} 방면은 평균 {fm}분으로 가장 빠르게 닿고, {sa} 등 외곽은 약 {sm}분이 걸립니다.",
+    "{lm1} 일대는 숙소·오피스 예약 비중이 높아 야간 콜이 특히 많습니다.",
+    "{d} 내 신규 입주·상권 변화는 분기별로 배차 데이터에 반영해 동선을 조정합니다.",
+]
 
 
 def overview_notes(district, region):
-    """OVERVIEW 노트 카드 4개 (05~08 위치)."""
+    """OVERVIEW 노트 카드 4개 (05~08). 앵커 문장은 수치/지명으로 고유, 나머지는 풀에서 셔플 선택."""
+    f = _facts(district, region)
     rows = arrival_table(district)
-    fastest = min(rows, key=lambda r: r[1])
-    slowest = max(rows, key=lambda r: r[1])
-    avg = round(sum(r[1] for r in rows) / len(rows))
     dong_line = ", ".join(f"{a} 약 {m}분" for a, m in rows)
-    peak, second = time_distribution(district)
-    course = recommend_course(district)
+    sd = _seed(district["slug"])
     return [
         ("동(洞)별 평균 도착 시간 분포", [
-            f"{district['kr']} 권역의 동별 평균 도착 시간은 다음과 같습니다 — {dong_line}.",
-            f"가장 빠른 곳은 {fastest[0]}(약 {fastest[1]}분), 상대적으로 거리가 있는 곳은 {slowest[0]}(약 {slowest[1]}분)입니다.",
-            f"권역 전체 평균은 약 {avg}분이며, 인접 권역 대기 관리사가 있을 경우 더 단축됩니다.",
+            f"{f['d']} 권역의 동별 평균 도착 시간은 다음과 같습니다 — {dong_line}.",
+            f"가장 빠른 곳은 {f['fa']}(약 {f['fm']}분), 상대적으로 거리가 있는 곳은 {f['sa']}(약 {f['sm']}분)이며, 권역 평균은 약 {f['avg']}분입니다.",
+            f"인접 권역 대기 관리사가 있을 경우 {f['d']} 도착 시간은 더 단축됩니다.",
         ]),
         ("시간대별 콜 분포 특징", [
-            f"{district['kr']}는 {peak}.",
-            f"{second}.",
-            "본사 디스패처는 이 분포에 맞춰 피크 시간 전에 인접 권역 관리사를 미리 대기시킵니다.",
+            f"{f['d']} 콜의 약 {f['peak_pct']}%가 저녁 7시 이후 야간에 집중되며, 자정~새벽 심야 비중도 약 {f['night_pct']}%에 이릅니다.",
+            *[s.format(**f) for s in _choose(sd + 11, _POOL_TIME, 2)],
         ]),
         ("권역 성격에 맞는 추천 코스", [
-            f"{district['kr']}는 {district['character']}입니다.",
-            course,
-            "예약 시 컨디션을 말씀해 주시면 코스와 압을 함께 조율해 드립니다.",
+            f"{f['dt']} {f['char']} 특성이 뚜렷해, {f['kw']} 코스 문의가 많고 평균 {f['avg']}분 도착에 맞춰 90분 구성을 우선 추천합니다.",
+            *[s.format(**f) for s in _choose(sd + 22, _POOL_COURSE, 2)],
         ]),
         ("예약·결제·환불 한눈에", [
-            "예약은 전화 또는 카카오톡으로 지역·코스·시간만 알려주시면 됩니다.",
-            "코스와 시간은 예약 시 확정되며 추가 비용이 발생하지 않습니다.",
-            "관리사 출발 전에는 전액 환불되며, 출발 이후 기준은 예약 시 안내드립니다.",
+            f"{f['d']} 예약은 전화 또는 카카오톡으로 지역·코스·시간만 알려주시면 즉시 확정됩니다.",
+            *[s.format(**f) for s in _choose(sd + 33, _POOL_PAY, 2)],
         ]),
     ]
 
 
-def recommend_course(district):
-    sd = _seed(district["slug"] + "course")
-    return _pick(sd, [
-        "장시간 앉아 일하는 분이 많아 어깨·허리 집중의 스웨디시·아로마 90분 코스 문의가 가장 많습니다.",
-        "활동량이 많은 권역 특성상 딥티슈 계열 스포츠 코스와 타이 건식 스트레칭 선호도가 높습니다.",
-        "심야 휴식 수요가 커 깊은 이완 중심의 아로마·로미로미 120분 코스가 꾸준히 예약됩니다.",
-        "첫 방문 고객 비중이 높아 부담이 적은 스웨디시 60분으로 시작하는 경우가 많습니다.",
-    ])
-
-
 def field_notes(district, region):
-    """FIELD NOTES 노트 카드 4개 (01~04)."""
-    landmarks = ", ".join(district["landmarks"])
+    """FIELD NOTES 노트 카드 4개 (01~04). 앵커 고유 + 풀 셔플 + 법적 고지 변주."""
+    f = _facts(district, region)
+    sd = _seed(district["slug"])
+    legal = _choose(sd + 55, _POOL_LEGAL, 1)[0].format(**f)
     return [
         ("권역의 특징", [
-            f"{region['kr']} {district['kr']}는 {district['character']}으로, {landmarks} 일대를 중심으로 생활·이동 동선이 형성됩니다.",
-            f"이 동선을 기준으로 {', '.join(district['areas'][:3])} 등 주요 생활권의 콜이 집중됩니다.",
-            "마톡은 권역의 실제 이동 흐름에 맞춰 대기 위치를 배치합니다.",
+            f"{f['r']} {f['dt']} {f['char']}입니다. {f['lmjoin']} 일대를 중심으로 생활·이동 동선이 형성됩니다.",
+            *[s.format(**f) for s in _choose(sd + 1, _POOL_AREA, 2)],
         ]),
         ("관리사 배치 및 도착 시간", [
-            f"{district['kr']} 내부와 인접 권역에 관리사를 분산 대기시켜 호출 후 이동 거리를 최소화합니다.",
-            "피크 시간대에는 디스패처가 사전 대기 인원을 늘려 평균 도착 시간을 관리합니다.",
-            "교통 상황에 따라 예상 시간이 바뀌면 예약 단계에서 다시 안내드립니다.",
+            f"{f['d']} 내부와 인접 권역에 관리사를 분산 대기시켜, 호출 후 평균 {f['avg']}분 내 도착을 목표로 운영합니다.",
+            *[s.format(**f) for s in _choose(sd + 2, _POOL_DISPATCH, 2)],
         ]),
         ("안전 가이드 — 자문 트레이너 감수", [
-            "모든 코스의 강도·부위 기준은 안전 자문 트레이너 박지연 트레이너의 가이드라인에 따라 설계되었습니다.",
-            "관리사는 표준 안전 교육과 정기 재교육을 이수한 인원으로만 배차됩니다.",
-            "통증·질환이 있는 부위는 사전에 알려주시면 해당 부위를 피하거나 강도를 낮춰 진행합니다.",
+            f"{f['d']}에 배차되는 모든 관리사는 신원 확인과 표준 안전 교육을 이수한 인원으로 한정합니다.",
+            *[s.format(**f) for s in _choose(sd + 3, _POOL_SAFETY, 2)],
         ]),
         ("결제·예약 운영 원칙", [
-            "예약 시 확정된 금액 외 현장 추가 요구는 일절 없습니다.",
-            f"{C.BRAND_FULL}는 의료 행위가 아닌 건강관리·휴식 서비스를 제공하며 만 19세 이상을 대상으로 합니다.",
-            "불법·퇴폐 서비스를 제공하지 않으며, 위반 시 즉시 배차를 중단합니다.",
+            f"{f['d']} 예약 시 확정된 금액 외 현장 추가 요구는 일절 없습니다.",
+            legal,
+            _choose(sd + 4, ["불법·퇴폐 서비스를 제공하지 않으며, 위반 시 즉시 배차를 중단합니다.",
+                             "예약 내용과 응대 기록은 품질 관리를 위해 본사에서 직접 관리합니다.",
+                             f"{f['d']} 관련 문의나 불편 사항은 본사 고객센터로 알려주시면 즉시 조치합니다."], 1)[0],
         ]),
     ]
 
@@ -167,7 +227,7 @@ _TITLE_TEMPLATES = [
 
 _DESC_TEMPLATES = [
     "{r} {d} 출장마사지. {lm1} 일대를 포함한 {d} 전역에 평균 약 {avg}분 도착합니다. {kw} 등 5종 코스를 24시간 예약하세요. 예약 시 확정 금액 그대로, 추가요금 없음.",
-    "{d}는 {char}입니다. {a3} 등 전역에 검증 관리사를 24시간 배차하며 {fa}는 약 {fm}분 내 방문합니다. 동별 도착시간·후기·요금을 확인하세요.",
+    "{dt} {char}입니다. {a3} 등 전역에 검증 관리사를 24시간 배차하며 {fat} 약 {fm}분 내 방문합니다. 동별 도착시간·후기·요금을 확인하세요.",
     "{d}에서 집·숙소로 부르는 방문 마사지 — {lm} 근처까지 평균 {avg}분, 심야에도 예약됩니다. {kw} 코스와 실제 이용 후기, 투명한 요금을 안내합니다.",
     "{r} {d} 출장마사지 가이드. 배차 로그로 산출한 {d} 동별 평균 도착시간, 권역 특성({char}), 코스별 요금과 후기를 한 페이지에 정리했습니다.",
     "{d} 출장마사지 24시간 운영. {a3} 등 어디든 평균 약 {avg}분 도착하며 {kw} 중심으로 추천합니다. 예약 시 확정된 금액 외 추가 요구가 없습니다.",
@@ -193,6 +253,7 @@ def meta_desc(r, d, avg, arrivals):
     fields = {"d": d["kr"], "r": r["kr"], "lm": ", ".join(d["landmarks"][:2]),
               "lm1": d["landmarks"][0], "a0": areas[0], "a1": areas[1],
               "a3": ", ".join(d["areas"][:3]), "char": d["character"],
-              "fa": fast[0], "fm": fast[1], "kw": _course_kw(d), "avg": avg}
+              "fa": fast[0], "fm": fast[1], "kw": _course_kw(d), "avg": avg,
+              "dt": josa(d["kr"], "은는"), "fat": josa(fast[0], "은는")}
     tpl = _DESC_TEMPLATES[_seed(d["slug"] + "desc") % len(_DESC_TEMPLATES)]
     return tpl.format(**fields)

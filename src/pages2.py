@@ -138,8 +138,8 @@ def _district_page(r, d):
     landmarks = ", ".join(d["landmarks"])
 
     faq = [
-        (f"{d['kr']}는 출장마사지 도착까지 얼마나 걸리나요?",
-         f"{d['kr']} 권역 평균 약 {avg}분입니다. {arrivals[0][0]}는 약 {arrivals[0][1]}분 내외로 도착합니다."),
+        (f"{d['kr']} 출장마사지는 도착까지 얼마나 걸리나요?",
+         f"{d['kr']} 권역 평균 약 {avg}분입니다. {gen.josa(arrivals[0][0], '은는')} 약 {arrivals[0][1]}분 내외로 도착합니다."),
         (f"{d['kr']} 어느 동까지 출장이 되나요?",
          f"{', '.join(d['areas'])} 등 {d['kr']} 전역에 배차합니다. 인접 권역도 가능합니다."),
         (f"{d['kr']}에서 심야에도 예약되나요?",
@@ -192,6 +192,7 @@ def _district_page(r, d):
   <p>위 동별 도착 시간은 {S['months']}개월간 누적된 {r['kr']} 권역 배차 로그를 동(洞) 단위로 집계한 1차 데이터입니다.</p>
   <p>교통 상황·시간대에 따라 실제 도착 시간은 달라질 수 있으며, 예약 시 예상 시간을 다시 안내드립니다.</p>
   <p class="src">출처: 마톡 본사 디스패치 로그 · {esc(d['kr'])} 권역 집계(2025.10–2026.05). 분기별 갱신.</p>
+  <p class="src">작성 <a href="/about/" style="color:var(--rose)">마톡 편집팀</a> · 감수 박지연(안전 자문 트레이너) · 최종 갱신 2026-05</p>
 </div></section>"""
 
     html += f'<section class="wrap cv" style="padding-top:0">{section_head("PRICING", "코스 요금")}{price_grid(D.SERVICES)}</section>'
