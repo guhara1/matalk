@@ -89,6 +89,10 @@ def build_index():
         f"{C.BRAND_FULL} | 서울·경기·인천·부산 24시간 방문 건강관리",
         f"{C.BRAND} 출장마사지 — 서울 25개구·경기 31개시군·인천·부산 전 권역 24시간 배차. 평균 {S['avg_arrival_min']}분 도착, 예약 시 확정 금액 그대로. 스웨디시·아로마·타이·로미로미·스포츠 코스 안내.",
         "/", jsonld_blocks=blocks, prefetch=["/pricing/", "/locations/"],
+        extra_meta=(
+            '<meta name="naver-site-verification" content="30363baba6fc86ad2bb4e417ae432a7accb60d1e">'
+            '<meta name="google-site-verification" content="eBesLq6H_j5MQTaHNfknYR_4H1-7UuHkG2ohfTSRX6o">'
+        ),
     )
     html += header()
     html += f"""<section class="hero"><div class="hero-inner">

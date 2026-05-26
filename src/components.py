@@ -275,7 +275,7 @@ def jsonld(obj):
 # ─────────────────────────────────────────────
 # <head>
 # ─────────────────────────────────────────────
-def head(title, desc, path, *, jsonld_blocks=None, prefetch=None, og_image=None):
+def head(title, desc, path, *, jsonld_blocks=None, prefetch=None, og_image=None, extra_meta=""):
     url = C.DOMAIN + path
     og_image = og_image or (C.DOMAIN + "/assets/og-cover.jpg")
     blocks = "".join(jsonld_blocks or [])
@@ -289,7 +289,7 @@ def head(title, desc, path, *, jsonld_blocks=None, prefetch=None, og_image=None)
 <meta name="format-detection" content="telephone=no">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <meta name="googlebot" content="index,follow">
-<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="referrer" content="strict-origin-when-cross-origin">{extra_meta}
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <meta name="author" content="{esc(C.AUTHOR)}">
