@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """사이트 전역 설정. 도메인 연결 시 이 파일만 수정하면 됩니다."""
 
-DOMAIN = "https://matalk.kr"
+DOMAIN = "https://pacifichealthoptions.com"
 
 BRAND = "마톡"
 BRAND_FULL = "마톡 출장마사지"
@@ -11,7 +11,7 @@ LEGAL_NAME = "YH LAB"
 # 연락처
 PHONE = "0508-202-4743"            # 표시용
 PHONE_TEL = "+825082024743"        # tel: 링크용 (0508-202-4743)
-EMAIL = "help@matalk.kr"
+EMAIL = "help@pacifichealthoptions.com"
 KAKAO = "@마톡"
 
 # 사업자 정보

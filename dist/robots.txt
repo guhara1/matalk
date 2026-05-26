@@ -12,5 +12,5 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://matalk.kr/sitemap.xml
-Host: matalk.kr
+Sitemap: https://pacifichealthoptions.com/sitemap.xml
+Host: pacifichealthoptions.com
