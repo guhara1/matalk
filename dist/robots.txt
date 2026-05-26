@@ -3,6 +3,27 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Yeti
+Allow: /
+
+User-agent: NaverBot
+Allow: /
+
+User-agent: Daum
+Allow: /
+
+User-agent: Daumoa
+Allow: /
+
+User-agent: bingbot
+Allow: /
+
 User-agent: GPTBot
 Allow: /
 
@@ -13,4 +34,6 @@ User-agent: Google-Extended
 Allow: /
 
 Sitemap: https://pacifichealthoptions.com/sitemap.xml
+Sitemap: https://pacifichealthoptions.com/sitemap1.xml
+Sitemap: https://pacifichealthoptions.com/rss.xml
 Host: pacifichealthoptions.com

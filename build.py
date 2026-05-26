@@ -13,7 +13,8 @@ import re
 import sys
 import json
 import shutil
-from datetime import date
+from datetime import date, datetime, timezone
+from email.utils import format_datetime
 
 from src import config as C
 from src import data as D
@@ -85,41 +86,107 @@ def webmanifest():
 
 
 def robots_txt():
+    # 색인 봇별 허용 (구글·네이버 Yeti·다음·빙 + AI 크롤러) + 다중 사이트맵 + RSS
+    host = C.DOMAIN.replace("https://", "").replace("http://", "")
+    bots = ["*", "Googlebot", "Googlebot-Image", "Yeti", "NaverBot", "Daum", "Daumoa",
+            "bingbot", "GPTBot", "ClaudeBot", "Google-Extended"]
+    body = "".join(f"User-agent: {b}\nAllow: /\n\n" for b in bots)
+    body = body.replace("User-agent: *\nAllow: /\n\n",
+                        "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\n\n")
     return (
-        "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\n\n"
-        "User-agent: GPTBot\nAllow: /\n\n"
-        "User-agent: ClaudeBot\nAllow: /\n\n"
-        "User-agent: Google-Extended\nAllow: /\n\n"
-        f"Sitemap: {C.DOMAIN}/sitemap.xml\n"
-        f"Host: {C.DOMAIN.replace('https://', '')}\n"
+        body
+        + f"Sitemap: {C.DOMAIN}/sitemap.xml\n"
+        + f"Sitemap: {C.DOMAIN}/sitemap1.xml\n"
+        + f"Sitemap: {C.DOMAIN}/rss.xml\n"
+        + f"Host: {host}\n"
     )
 
 
-def sitemap_xml(paths):
+def _priority(p):
+    depth = p.strip("/").count("/")
+    if p == "/":
+        return "1.0", "daily"
+    if p.startswith("/locations/") and depth == 2:  # 행정구 리프
+        return "0.75", "weekly"
+    if p.startswith("/magazine/") and p != "/magazine/":
+        return "0.7", "weekly"
+    if p.startswith("/policy/"):
+        return "0.3", "yearly"
+    if depth >= 1:
+        return "0.85", "weekly"
+    return "0.9", "weekly"
+
+
+def sitemap_urlset(paths):
+    """전체 URL 사이트맵 (sitemap1.xml — 구글/네이버 제출용)."""
     today = date.today().isoformat()
-    prio = []
+    items = ""
     for p in paths:
-        url = p if p == "/" else p
-        depth = p.strip("/").count("/")
-        if p == "/":
-            pr, freq = "1.0", "daily"
-        elif p.startswith("/locations/") and depth == 2:  # district leaf
-            pr, freq = "0.75", "weekly"
-        elif p.startswith("/magazine/") and p != "/magazine/":
-            pr, freq = "0.7", "monthly"
-        elif p.startswith("/policy/"):
-            pr, freq = "0.3", "yearly"
-        elif depth >= 1:
-            pr, freq = "0.85", "weekly"
-        else:
-            pr, freq = "0.9", "weekly"
-        prio.append((C.DOMAIN + p, pr, freq))
-    items = "".join(
-        f"<url><loc>{u}</loc><lastmod>{today}</lastmod>"
-        f"<changefreq>{f}</changefreq><priority>{pr}</priority></url>"
-        for u, pr, f in prio)
+        pr, freq = _priority(p)
+        items += (f"<url><loc>{C.DOMAIN}{p}</loc><lastmod>{today}</lastmod>"
+                  f"<changefreq>{freq}</changefreq><priority>{pr}</priority></url>")
     return ('<?xml version="1.0" encoding="UTF-8"?>'
             '<urlset xmlns="http://www.w3.org/2000/sitemaps/0.9">' + items + "</urlset>")
+
+
+def sitemap_index():
+    """사이트맵 인덱스 (sitemap.xml) — 하위 사이트맵을 가리킴."""
+    today = date.today().isoformat()
+    subs = [f"{C.DOMAIN}/sitemap1.xml", f"{C.DOMAIN}/rss.xml"]
+    items = "".join(f"<sitemap><loc>{u}</loc><lastmod>{today}</lastmod></sitemap>" for u in subs)
+    return ('<?xml version="1.0" encoding="UTF-8"?>'
+            '<sitemapindex xmlns="http://www.w3.org/2000/sitemaps/0.9">' + items + "</sitemapindex>")
+
+
+def _rfc822(d):
+    try:
+        dt = datetime.strptime(d, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    except Exception:
+        dt = datetime.now(timezone.utc)
+    return format_datetime(dt)
+
+
+def _x(s):
+    return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+
+
+def rss_xml():
+    """RSS 2.0 피드 — 네이버/구글 빠른 색인용. 매거진 + 핵심 페이지를 항목으로."""
+    from src import data as D
+    now = format_datetime(datetime.now(timezone.utc))
+    items = []
+    # 매거진 글 (콘텐츠 스트림)
+    for m in D.MAGAZINE:
+        url = f"{C.DOMAIN}/magazine/{m['slug']}/"
+        items.append(
+            f"<item><title>{_x(m['title'])}</title><link>{url}</link>"
+            f"<guid isPermaLink=\"true\">{url}</guid>"
+            f"<pubDate>{_rfc822(m['date'])}</pubDate>"
+            f"<description>{_x(m['desc'])}</description></item>")
+    # 주요 허브 페이지 (신규 색인 유도)
+    hubs = [("/", f"{C.BRAND_FULL} — 서울·경기·인천·부산 24시간 출장 건강관리"),
+            ("/pricing/", f"{C.BRAND} 출장마사지 요금 안내"),
+            ("/locations/", f"{C.BRAND} 지역별 출장마사지")]
+    for r in D.REGIONS:
+        hubs.append((f"/locations/{r['slug']}/", f"{r['kr']} 출장마사지 — {C.BRAND}"))
+    for path, title in hubs:
+        url = C.DOMAIN + path
+        items.append(
+            f"<item><title>{_x(title)}</title><link>{url}</link>"
+            f"<guid isPermaLink=\"true\">{url}</guid>"
+            f"<pubDate>{now}</pubDate></item>")
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>'
+        f"<title>{_x(C.BRAND_FULL)}</title>"
+        f"<link>{C.DOMAIN}/</link>"
+        f'<atom:link href="{C.DOMAIN}/rss.xml" rel="self" type="application/rss+xml"/>'
+        f"<description>{_x('서울·경기·인천·부산 24시간 출장 건강관리 — 마톡 매거진과 지역 안내')}</description>"
+        "<language>ko</language>"
+        f"<lastBuildDate>{now}</lastBuildDate>"
+        f"<pubDate>{now}</pubDate>"
+        + "".join(items) +
+        "</channel></rss>")
 
 
 # ─────────────────────────────────────────────
@@ -166,7 +233,9 @@ def main():
     # 정적 파일
     extra = {
         "robots.txt": robots_txt(),
-        "sitemap.xml": sitemap_xml(sorted(set(written))),
+        "sitemap.xml": sitemap_index(),
+        "sitemap1.xml": sitemap_urlset(sorted(set(written))),
+        "rss.xml": rss_xml(),
         "site.webmanifest": webmanifest(),
         "favicon.svg": favicon_svg(),
     }
@@ -206,7 +275,7 @@ def main():
         for val, files in list(dup.items())[:10]:
             print(f"    ! {label} 중복: {val[:60]!r} → {files}")
     # 내부 링크 점검 (간단)
-    print("  · robots.txt / sitemap.xml / site.webmanifest / favicon.svg 생성됨")
+    print("  · robots.txt / sitemap.xml(index) / sitemap1.xml / rss.xml / manifest / favicon 생성됨")
     return 0 if not (dup_t or dup_d or dup_c) else 1
 
 

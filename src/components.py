@@ -313,6 +313,8 @@ def head(title, desc, path, *, jsonld_blocks=None, prefetch=None, og_image=None,
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
+<link rel="alternate" type="application/rss+xml" title="{esc(C.BRAND_FULL)} RSS" href="/rss.xml">
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
 {pf}
 <style>{CSS}</style>
 {blocks}
