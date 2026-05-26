@@ -139,3 +139,60 @@ def reviews(district, n=6):
         whos = who.format(area=area, nick=nick)
         out.append({"body": body, "who": whos, "rating": rating, "author": nick})
     return out
+
+
+# ─────────────────────────────────────────────
+# 행정구별 고유 메타 (title / description)
+# 동일 템플릿 치환을 피하기 위해 문장 구조 자체를 시드로 분기합니다.
+# ─────────────────────────────────────────────
+_COURSE_KW = ["스웨디시·아로마", "타이·스포츠", "아로마·로미로미", "딥티슈 스포츠", "스웨디시·타이", "로미로미·아로마"]
+
+
+def _course_kw(district):
+    return _COURSE_KW[_seed(district["slug"] + "kw") % len(_COURSE_KW)]
+
+
+_TITLE_TEMPLATES = [
+    "{d} 출장마사지 — {lm} 일대 24시간 방문관리 | 마톡",
+    "{r} {d} 출장마사지 | 평균 {avg}분 도착·{kw} | 마톡",
+    "{d} 출장마사지 후기·요금 — {a0}·{a1} 방문 | 마톡",
+    "마톡 {d} 출장마사지 | {kw} 24시간 심야 배차",
+    "{d} 출장마사지 추천 | {lm} 근처 방문 마사지 | 마톡",
+    "{r} {d} 방문 마사지 — {kw} 평균 {avg}분 | 마톡",
+    "{d} 출장마사지 — {a0} 평균 {avg}분 방문 후기 | 마톡",
+    "{d} 24시 출장마사지 | {a0} {lm} 방문관리 | 마톡",
+    "{d} 출장마사지 가격·예약 | {lm} {kw} 24시간 | 마톡",
+    "{lm} {d} 출장마사지 | {kw} 방문 건강관리 | 마톡",
+]
+
+_DESC_TEMPLATES = [
+    "{r} {d} 출장마사지. {lm1} 일대를 포함한 {d} 전역에 평균 약 {avg}분 도착합니다. {kw} 등 5종 코스를 24시간 예약하세요. 예약 시 확정 금액 그대로, 추가요금 없음.",
+    "{d}는 {char}입니다. {a3} 등 전역에 검증 관리사를 24시간 배차하며 {fa}는 약 {fm}분 내 방문합니다. 동별 도착시간·후기·요금을 확인하세요.",
+    "{d}에서 집·숙소로 부르는 방문 마사지 — {lm} 근처까지 평균 {avg}분, 심야에도 예약됩니다. {kw} 코스와 실제 이용 후기, 투명한 요금을 안내합니다.",
+    "{r} {d} 출장마사지 가이드. 배차 로그로 산출한 {d} 동별 평균 도착시간, 권역 특성({char}), 코스별 요금과 후기를 한 페이지에 정리했습니다.",
+    "{d} 출장마사지 24시간 운영. {a3} 등 어디든 평균 약 {avg}분 도착하며 {kw} 중심으로 추천합니다. 예약 시 확정된 금액 외 추가 요구가 없습니다.",
+    "{lm1}가 있는 {d}에서 받는 출장 건강관리. 평균 {avg}분 방문, {kw} 코스 60·90·120분. 안전 자문 트레이너 감수 기준으로 운영합니다.",
+    "{d} 출장마사지 후기와 요금 정리. {fa} 약 {fm}분 등 동별 도착시간을 공개하고 {kw} 코스를 안내합니다. {r} 전역 24시간 연중무휴 배차.",
+    "{r} {d} 전역 24시간 방문 마사지. {char} 특성에 맞춰 {kw} 코스를 추천하고, 동별 도착시간·실후기·정찰 요금을 투명하게 제공합니다.",
+    "{d} 방문 마사지 예약 안내. {a0}·{a1} 등 {d} 어디든 평균 {avg}분, {lm1} 인근까지 배차합니다. 의료 아닌 건강관리 서비스로 만 19세 이상 대상.",
+    "{r} {d} 출장마사지를 평균 {avg}분에. {kw} 코스를 컨디션에 맞춰 조율하고, {d}만의 동별 도착 데이터와 권역별 후기를 함께 제공합니다.",
+]
+
+
+def meta_title(r, d, avg):
+    areas = d["areas"] + ["", ""]
+    fields = {"d": d["kr"], "r": r["kr"], "lm": d["landmarks"][0],
+              "a0": areas[0], "a1": areas[1], "kw": _course_kw(d), "avg": avg}
+    tpl = _TITLE_TEMPLATES[_seed(d["slug"] + "title") % len(_TITLE_TEMPLATES)]
+    return tpl.format(**fields)
+
+
+def meta_desc(r, d, avg, arrivals):
+    fast = min(arrivals, key=lambda x: x[1])
+    areas = d["areas"] + ["", ""]
+    fields = {"d": d["kr"], "r": r["kr"], "lm": ", ".join(d["landmarks"][:2]),
+              "lm1": d["landmarks"][0], "a0": areas[0], "a1": areas[1],
+              "a3": ", ".join(d["areas"][:3]), "char": d["character"],
+              "fa": fast[0], "fm": fast[1], "kw": _course_kw(d), "avg": avg}
+    tpl = _DESC_TEMPLATES[_seed(d["slug"] + "desc") % len(_DESC_TEMPLATES)]
+    return tpl.format(**fields)

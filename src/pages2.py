@@ -46,6 +46,27 @@ def build_locations_hub():
     return [("/locations/index.html", html)]
 
 
+# 광역 허브 메타 (4개 권역 각각 다른 구조·각도)
+_REGION_META = {
+    "seoul": (
+        "서울 출장마사지 — 25개 자치구 심야 방문관리 | 마톡",
+        "서울 25개 자치구 어디든 평균 30분대 방문하는 출장마사지. 강남·마포·송파부터 노원·은평까지 도심 야간 수요에 맞춰 24시간 배차하며, 자치구별 동 도착시간과 코스 요금을 안내합니다.",
+    ),
+    "gyeonggi": (
+        "경기 출장마사지 | 31개 시·군 광역 24시간 배차 — 마톡",
+        "수원·성남·고양·용인 등 경기 31개 시·군을 아우르는 방문 마사지. 신도시·외곽까지 권역별 대기 배치로 도착시간을 관리하며, 시·군별 페이지에서 동 도착 데이터와 정찰 요금을 확인할 수 있습니다.",
+    ),
+    "incheon": (
+        "인천 출장마사지 — 송도·청라·공항권 방문관리 | 마톡",
+        "송도·청라 신도시부터 공항·원도심까지 인천 10개 군·구 전역 출장마사지. 권역마다 다른 동선에 맞춰 24시간 검증 관리사를 배차하고, 구별 평균 도착시간과 코스 요금을 투명하게 제공합니다.",
+    ),
+    "busan": (
+        "부산 출장마사지 | 해운대·서면 등 16개 군·구 24시 — 마톡",
+        "해운대·서면·광안리를 비롯한 부산 16개 군·구 방문 마사지. 해안 관광권과 주거권의 야간 수요에 맞춰 연중무휴 배차하며, 구별 동 도착시간·실후기·정찰 요금을 한곳에 정리했습니다.",
+    ),
+}
+
+
 # ─────────────────────────────────────────────
 # 광역 허브 (/locations/seoul/ 등)
 # ─────────────────────────────────────────────
@@ -74,8 +95,8 @@ def build_region_hubs():
                                        "url": C.DOMAIN + f"/locations/{r['slug']}/{d['slug']}/"}
                                       for i, d in enumerate(r["districts"], 1)]}),
                   jsonld({"@context": "https://schema.org", **{k: v for k, v in localbusiness_jsonld(area=r['kr'], name=f"{C.BRAND_FULL} {r['kr']}").items()}})]
-        html = head(f"{r['kr']} 출장마사지 — {r['label']} 24시간 배차 | 마톡",
-                    f"{r['kr']} 출장마사지. {r['label']} 전 권역에 24시간 배차합니다. 시·군·구별 동별 평균 도착 시간과 권역 특성, 코스 요금을 확인하세요.",
+        rt, rd = _REGION_META[r["slug"]]
+        html = head(rt, rd,
                     f"/locations/{r['slug']}/", jsonld_blocks=blocks, prefetch=[f"/locations/{r['slug']}/{r['districts'][0]['slug']}/"])
         html += header()
         html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
@@ -139,8 +160,8 @@ def _district_page(r, d):
         ]}),
     ]
 
-    html = head(f"{d['kr']} 출장마사지 — {r['kr']} {d['kr']} 24시간 방문 | 마톡",
-                f"{r['kr']} {d['kr']} 출장마사지. {', '.join(d['areas'][:3])} 등 전역 평균 약 {avg}분 도착. 동별 도착 시간·권역 특성·후기·요금을 확인하세요. 24시간 배차, 확정 금액 그대로.",
+    html = head(gen.meta_title(r, d, avg),
+                gen.meta_desc(r, d, avg, arrivals),
                 path, jsonld_blocks=blocks, prefetch=["/pricing/"])
     html += header()
     html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
