@@ -201,6 +201,18 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
 .reveal{opacity:0;transform:translateY(20px);transition:.8s}
 .reveal.in{opacity:1;transform:none}
 
+/* MOBILE FIXED CALL BAR */
+.callbar{display:none}
+.callbar a{display:flex;align-items:center;justify-content:center;gap:8px}
+@media(max-width:1100px){
+  .callbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:120;
+    padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));
+    background:rgba(11,11,14,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+  .callbar .c-call{flex:1;background:var(--grad);color:#1a1108;font-weight:800;font-size:15.5px;
+    padding:15px;border-radius:13px}
+  body{padding-bottom:78px}
+}
+
 /* CONTENT VISIBILITY */
 .cv{content-visibility:auto;contain-intrinsic-size:auto 700px}
 
@@ -375,6 +387,9 @@ def footer():
   © 2026 {esc(C.BRAND_FULL)}. All rights reserved.
 </div>
 </div></footer>
+<nav class="callbar" aria-label="빠른 예약">
+  <a class="c-call" href="tel:{C.PHONE_TEL}" aria-label="전화 예약 {esc(C.PHONE)}">📞 24시 전화 예약 {esc(C.PHONE)}</a>
+</nav>
 <script>{JS}</script></body></html>"""
 
 

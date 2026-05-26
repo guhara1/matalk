@@ -102,7 +102,11 @@ def build_region_hubs():
         html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
 <span class="eyebrow"><span class="pulse"></span>{esc(r['en'].upper())}</span>
 <h1>{esc(r['kr'])} <span class="grad">출장마사지</span></h1>
-<p class="lead">{esc(r['label'])} 전 권역 24시간 배차. 아래에서 원하는 지역을 선택하세요.</p></div></section>"""
+<p class="lead">{esc(r['label'])} 전 권역 24시간 배차. 아래에서 원하는 지역을 선택하세요.</p>
+<div class="actions">
+  <a class="btn btn-primary" href="tel:{C.PHONE_TEL}">📞 {esc(r['kr'])} 전화 예약 {esc(C.PHONE)}</a>
+  <a class="btn btn-ghost" href="/pricing/">요금 보기</a>
+</div></div></section>"""
         dist_head = section_head("DISTRICTS", f"{r['kr']} {r['label']}")
         html += f'<section class="wrap cv">{dist_head}<div class="grid g3">{cards}</div></section>'
         html += f'<section class="wrap cv" style="padding-top:0">{notes}</section>'
@@ -168,6 +172,10 @@ def _district_page(r, d):
 <span class="eyebrow"><span class="pulse"></span>{esc(r['en'].upper())} · {esc(d['kr'])} OPERATIONS</span>
 <h1>{esc(d['kr'])} <span class="grad">출장마사지</span></h1>
 <p class="lead">{esc(d['character'])}. {esc(landmarks)} 일대를 포함한 {esc(d['kr'])} 전역에 24시간 배차합니다.</p>
+<div class="actions">
+  <a class="btn btn-primary" href="tel:{C.PHONE_TEL}">📞 {esc(d['kr'])} 전화 예약 {esc(C.PHONE)}</a>
+  <a class="btn btn-ghost" href="/pricing/">요금 보기</a>
+</div>
 <div class="chips">
   <div class="chip"><small>평균 도착</small><b>약 {avg}분</b></div>
   <div class="chip"><small>운영</small><b>{esc(C.HOURS)}</b></div>

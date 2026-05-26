@@ -223,6 +223,18 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
 .reveal{opacity:0;transform:translateY(20px);transition:.8s}
 .reveal.in{opacity:1;transform:none}
 
+/* MOBILE FIXED CALL BAR */
+.callbar{display:none}
+.callbar a{display:flex;align-items:center;justify-content:center;gap:8px}
+@media(max-width:1100px){
+  .callbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:120;
+    padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));
+    background:rgba(11,11,14,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+  .callbar .c-call{flex:1;background:var(--grad);color:#1a1108;font-weight:800;font-size:15.5px;
+    padding:15px;border-radius:13px}
+  body{padding-bottom:78px}
+}
+
 /* CONTENT VISIBILITY */
 .cv{content-visibility:auto;contain-intrinsic-size:auto 700px}
 
@@ -254,7 +266,7 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
   html{scroll-behavior:auto}
 }
 </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://matalk.kr/"},{"@type":"ListItem","position":2,"name":"소개"}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://matalk.kr/#org","name":"마톡 출장마사지","legalName":"마톡","url":"https://matalk.kr/","logo":"https://matalk.kr/assets/logo.png","email":"help@matalk.kr","sameAs":["https://instagram.com/matalk.kr","https://blog.naver.com/matalk"],"contactPoint":{"@type":"ContactPoint","telephone":"+820000000000","contactType":"reservations","availableLanguage":["ko","en"]}},{"@type":"AboutPage","name":"마톡 출장마사지 소개","url":"https://matalk.kr/about/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://matalk.kr/"},{"@type":"ListItem","position":2,"name":"소개"}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://matalk.kr/#org","name":"마톡 출장마사지","legalName":"마톡","url":"https://matalk.kr/","logo":"https://matalk.kr/assets/logo.png","email":"help@matalk.kr","sameAs":["https://instagram.com/matalk.kr","https://blog.naver.com/matalk"],"contactPoint":{"@type":"ContactPoint","telephone":"+825082024743","contactType":"reservations","availableLanguage":["ko","en"]}},{"@type":"AboutPage","name":"마톡 출장마사지 소개","url":"https://matalk.kr/about/"}]}</script>
 </head><body><header><nav class="nav" aria-label="주 메뉴">
 <a class="brand" href="/" aria-label="마톡 출장마사지 홈"><b>마톡</b> <span>massage</span></a>
 <button class="toggle" aria-expanded="false" aria-controls="primary-menu" aria-label="메뉴 열기">☰</button>
@@ -266,15 +278,15 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
 <li><a href="/magazine/">매거진</a></li>
 <li><a href="/reviews/">후기</a></li>
 <li><a href="/about/">소개</a></li>
-<li><a class="cta-pill" href="tel:+820000000000">24시 예약</a></li>
+<li><a class="cta-pill" href="tel:+825082024743">24시 예약</a></li>
 </ul></nav></header><section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px"><div class="breadcrumb"><a href="/">홈</a> <span style='color:var(--dim)'>›</span> 소개</div>
 <span class="eyebrow"><span class="pulse"></span>ABOUT</span>
 <h1>실명으로 책임지는<br><span class="grad">운영</span></h1>
-<p class="lead">누가, 어떻게, 왜 운영하는지 공개하는 것이 신뢰의 출발이라고 믿습니다.</p></div></section><section class="wrap cv"><div class="section-head reveal"><span class="eyebrow"><span class="pulse"></span>OUR TEAM</span><h2>운영팀</h2></div><div class="grid g3"><div class="card reveal"><div class="k">업계 12년</div><h3>김세영</h3><p style="color:var(--rose);font-weight:700;margin-bottom:6px">서울·경기권 운영팀장</p><p>수도권 디스패치 운영을 총괄하며 권역별 배차 표준과 응대 매뉴얼을 설계합니다.</p></div><div class="card reveal"><div class="k">업계 9년</div><h3>정하늘</h3><p style="color:var(--rose);font-weight:700;margin-bottom:6px">인천·부산권 운영팀장</p><p>해안권·신도시 권역의 동선 데이터와 야간 콜 분포를 분석해 배차 시간을 단축합니다.</p></div><div class="card reveal"><div class="k">KSPO 스포츠마사지 트레이너 · 재활케어 8년</div><h3>박지연</h3><p style="color:var(--rose);font-weight:700;margin-bottom:6px">안전 자문 트레이너</p><p>관리사 안전 가이드라인과 코스별 강도 기준을 감수하고 정기 재교육을 진행합니다.</p></div></div></section><section class="wrap cv" style="padding-top:0"><div class="notes"><div class="note-card reveal"><div class="note-num">01</div><div><h3 class="note-title">회사 소개</h3><div class="note-text"><p>마톡 출장마사지는 서울·경기·인천·부산 전 권역에 출장 건강관리 서비스를 제공하는 브랜드입니다.</p><p>본사 디스패치 센터가 직접 관리사 배차와 고객 응대를 운영합니다.</p><p>외주 중개가 아닌 자체 운영 체계로 품질과 안전을 관리합니다.</p></div></div></div><div class="note-card reveal"><div class="note-num">02</div><div><h3 class="note-title">편집·콘텐츠 정책</h3><div class="note-text"><p>지역별 도착 시간·후기 데이터는 실 배차 로그와 고객 응답을 기반으로 작성합니다.</p><p>검증되지 않은 효능이나 과장 표현을 사용하지 않습니다.</p><p>정책·가격 변경 시 해당 페이지를 갱신하며 갱신 기준을 명시합니다.</p></div></div></div><div class="note-card reveal"><div class="note-num">03</div><div><h3 class="note-title">연락처</h3><div class="note-text"><p>고객센터: 0000-0000 (24시간 연중무휴)</p><p>이메일: help@matalk.kr</p><p>카카오톡: @마톡</p></div></div></div></div></section><section class="cta-band"><div class="wrap reveal">
+<p class="lead">누가, 어떻게, 왜 운영하는지 공개하는 것이 신뢰의 출발이라고 믿습니다.</p></div></section><section class="wrap cv"><div class="section-head reveal"><span class="eyebrow"><span class="pulse"></span>OUR TEAM</span><h2>운영팀</h2></div><div class="grid g3"><div class="card reveal"><div class="k">업계 12년</div><h3>김세영</h3><p style="color:var(--rose);font-weight:700;margin-bottom:6px">서울·경기권 운영팀장</p><p>수도권 디스패치 운영을 총괄하며 권역별 배차 표준과 응대 매뉴얼을 설계합니다.</p></div><div class="card reveal"><div class="k">업계 9년</div><h3>정하늘</h3><p style="color:var(--rose);font-weight:700;margin-bottom:6px">인천·부산권 운영팀장</p><p>해안권·신도시 권역의 동선 데이터와 야간 콜 분포를 분석해 배차 시간을 단축합니다.</p></div><div class="card reveal"><div class="k">KSPO 스포츠마사지 트레이너 · 재활케어 8년</div><h3>박지연</h3><p style="color:var(--rose);font-weight:700;margin-bottom:6px">안전 자문 트레이너</p><p>관리사 안전 가이드라인과 코스별 강도 기준을 감수하고 정기 재교육을 진행합니다.</p></div></div></section><section class="wrap cv" style="padding-top:0"><div class="notes"><div class="note-card reveal"><div class="note-num">01</div><div><h3 class="note-title">회사 소개</h3><div class="note-text"><p>마톡 출장마사지는 서울·경기·인천·부산 전 권역에 출장 건강관리 서비스를 제공하는 브랜드입니다.</p><p>본사 디스패치 센터가 직접 관리사 배차와 고객 응대를 운영합니다.</p><p>외주 중개가 아닌 자체 운영 체계로 품질과 안전을 관리합니다.</p></div></div></div><div class="note-card reveal"><div class="note-num">02</div><div><h3 class="note-title">편집·콘텐츠 정책</h3><div class="note-text"><p>지역별 도착 시간·후기 데이터는 실 배차 로그와 고객 응답을 기반으로 작성합니다.</p><p>검증되지 않은 효능이나 과장 표현을 사용하지 않습니다.</p><p>정책·가격 변경 시 해당 페이지를 갱신하며 갱신 기준을 명시합니다.</p></div></div></div><div class="note-card reveal"><div class="note-num">03</div><div><h3 class="note-title">연락처</h3><div class="note-text"><p>고객센터: 0508-202-4743 (24시간 연중무휴)</p><p>이메일: help@matalk.kr</p><p>카카오톡: @마톡</p></div></div></div></div></section><section class="cta-band"><div class="wrap reveal">
 <span class="eyebrow"><span class="pulse"></span>RESERVE TONIGHT</span>
 <h2>오늘 밤, 가장 가까운 관리사를 배차해 드립니다</h2><p>전화 또는 카카오톡으로 지역과 코스를 알려주시면 본사 디스패처가 예상 도착 시간을 즉시 안내드립니다.</p>
 <div class="actions" style="justify-content:center">
-<a class="btn btn-primary" href="tel:+820000000000">전화 예약 0000-0000 →</a>
+<a class="btn btn-primary" href="tel:+825082024743">전화 예약 0508-202-4743 →</a>
 <a class="btn btn-ghost" href="/pricing/">요금 보기</a>
 </div></div></section><footer class="site-footer"><div class="footer-wrap">
 <div class="footer-grid">
@@ -291,7 +303,7 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
 </div>
 <div class="footer-ops">
   <div class="blk"><small>운영 시간</small><b>24시간 연중무휴</b></div>
-  <div class="blk"><small>고객센터</small><b><a href="tel:+820000000000">0000-0000</a> · help@matalk.kr</b></div>
+  <div class="blk"><small>고객센터</small><b><a href="tel:+825082024743">0508-202-4743</a> · help@matalk.kr</b></div>
 </div>
 <div class="company-info"><div><span class="lbl">회사명</span>마톡</div><div><span class="lbl">대표자</span>[대표자명]</div><div><span class="lbl">사업자등록번호</span>[사업자등록번호]</div><div><span class="lbl">주소</span>[사업장 주소]</div><div><span class="lbl">통신판매업신고</span>[통신판매업신고번호]</div><div><span class="lbl">개인정보보호책임자</span>[개인정보보호책임자]</div></div>
 <div class="footer-policies">
@@ -306,6 +318,9 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
   © 2026 마톡 출장마사지. All rights reserved.
 </div>
 </div></footer>
+<nav class="callbar" aria-label="빠른 예약">
+  <a class="c-call" href="tel:+825082024743" aria-label="전화 예약 0508-202-4743">📞 24시 전화 예약 0508-202-4743</a>
+</nav>
 <script>
 function idle(fn){if('requestIdleCallback'in window){requestIdleCallback(fn,{timeout:1500})}else{setTimeout(fn,1)}}
 idle(function(){

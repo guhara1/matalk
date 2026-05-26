@@ -223,6 +223,18 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
 .reveal{opacity:0;transform:translateY(20px);transition:.8s}
 .reveal.in{opacity:1;transform:none}
 
+/* MOBILE FIXED CALL BAR */
+.callbar{display:none}
+.callbar a{display:flex;align-items:center;justify-content:center;gap:8px}
+@media(max-width:1100px){
+  .callbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:120;
+    padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));
+    background:rgba(11,11,14,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+  .callbar .c-call{flex:1;background:var(--grad);color:#1a1108;font-weight:800;font-size:15.5px;
+    padding:15px;border-radius:13px}
+  body{padding-bottom:78px}
+}
+
 /* CONTENT VISIBILITY */
 .cv{content-visibility:auto;contain-intrinsic-size:auto 700px}
 
@@ -254,7 +266,7 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
   html{scroll-behavior:auto}
 }
 </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://matalk.kr/"},{"@type":"ListItem","position":2,"name":"지역","item":"https://matalk.kr/locations/"},{"@type":"ListItem","position":3,"name":"서울","item":"https://matalk.kr/locations/seoul/"},{"@type":"ListItem","position":4,"name":"성동구"}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"성동구는 출장마사지 도착까지 얼마나 걸리나요?","acceptedAnswer":{"@type":"Answer","text":"성동구 권역 평균 약 38분입니다. 성수동는 약 35분 내외로 도착합니다."}},{"@type":"Question","name":"성동구 어느 동까지 출장이 되나요?","acceptedAnswer":{"@type":"Answer","text":"성수동, 왕십리, 옥수동, 금호동 등 성동구 전역에 배차합니다. 인접 권역도 가능합니다."}},{"@type":"Question","name":"성동구에서 심야에도 예약되나요?","acceptedAnswer":{"@type":"Answer","text":"예. 24시간 연중무휴로 운영하여 심야·새벽에도 예약과 배차가 가능합니다."}},{"@type":"Question","name":"성동구 요금은 다른 지역과 다른가요?","acceptedAnswer":{"@type":"Answer","text":"동일한 코스별 표시 요금이 적용되며 출장비·할증 없이 예약 시 확정 금액 그대로입니다."}}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"HealthAndBeautyBusiness","@id":"https://matalk.kr/locations/seoul/seongdong/#business","name":"마톡 출장마사지 성동구","url":"https://matalk.kr/locations/seoul/seongdong/","image":"https://matalk.kr/assets/og-cover.jpg","telephone":"+820000000000","email":"help@matalk.kr","priceRange":"₩₩","areaServed":"서울 성동구","openingHoursSpecification":{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],"opens":"00:00","closes":"23:59"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.96","reviewCount":2380,"bestRating":"5"},"review":[{"@type":"Review","author":{"@type":"Person","name":"신O경"},"reviewRating":{"@type":"Rating","ratingValue":5,"bestRating":"5"},"reviewBody":"야근 끝나고 스웨디시 예약했어요. 왕십리 집까지 43분 만에 도착하셨고 다음 날 몸이 한결 가벼웠습니다."},{"@type":"Review","author":{"@type":"Person","name":"최O서"},"reviewRating":{"@type":"Rating","ratingValue":4,"bestRating":"5"},"reviewBody":"어깨 뭉친 게 심했는데 스웨디시로 집중해서 풀어주셨어요. 성수동까지 도착도 빨랐습니다."},{"@type":"Review","author":{"@type":"Person","name":"임O아"},"reviewRating":{"@type":"Rating","ratingValue":4,"bestRating":"5"},"reviewBody":"옥수동 신혼집에서 타이 받았는데 분위기도 편안하고 마무리까지 정갈했어요."},{"@type":"Review","author":{"@type":"Person","name":"이O연"},"reviewRating":{"@type":"Rating","ratingValue":5,"bestRating":"5"},"reviewBody":"가격도 예약할 때 들은 그대로였고 추가 요구 전혀 없었어요. 왕십리에서 로미로미 강추합니다."},{"@type":"Review","author":{"@type":"Person","name":"윤O지"},"reviewRating":{"@type":"Rating","ratingValue":5,"bestRating":"5"},"reviewBody":"타이 받았는데 성수동까지 생각보다 빨리 와주셔서 놀랐어요. 압도 딱 좋았습니다."},{"@type":"Review","author":{"@type":"Person","name":"박O현"},"reviewRating":{"@type":"Rating","ratingValue":5,"bestRating":"5"},"reviewBody":"로미로미 받았는데 성수동까지 생각보다 빨리 와주셔서 놀랐어요. 압도 딱 좋았습니다."}]},{"@type":"AdministrativeArea","name":"서울 성동구"},{"@type":"Service","name":"성동구 출장마사지","provider":{"@id":"https://matalk.kr/#org"},"areaServed":{"@type":"AdministrativeArea","name":"서울 성동구"},"description":"성동구 전역 24시간 출장 건강관리 서비스"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://matalk.kr/"},{"@type":"ListItem","position":2,"name":"지역","item":"https://matalk.kr/locations/"},{"@type":"ListItem","position":3,"name":"서울","item":"https://matalk.kr/locations/seoul/"},{"@type":"ListItem","position":4,"name":"성동구"}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"성동구는 출장마사지 도착까지 얼마나 걸리나요?","acceptedAnswer":{"@type":"Answer","text":"성동구 권역 평균 약 38분입니다. 성수동는 약 35분 내외로 도착합니다."}},{"@type":"Question","name":"성동구 어느 동까지 출장이 되나요?","acceptedAnswer":{"@type":"Answer","text":"성수동, 왕십리, 옥수동, 금호동 등 성동구 전역에 배차합니다. 인접 권역도 가능합니다."}},{"@type":"Question","name":"성동구에서 심야에도 예약되나요?","acceptedAnswer":{"@type":"Answer","text":"예. 24시간 연중무휴로 운영하여 심야·새벽에도 예약과 배차가 가능합니다."}},{"@type":"Question","name":"성동구 요금은 다른 지역과 다른가요?","acceptedAnswer":{"@type":"Answer","text":"동일한 코스별 표시 요금이 적용되며 출장비·할증 없이 예약 시 확정 금액 그대로입니다."}}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"HealthAndBeautyBusiness","@id":"https://matalk.kr/locations/seoul/seongdong/#business","name":"마톡 출장마사지 성동구","url":"https://matalk.kr/locations/seoul/seongdong/","image":"https://matalk.kr/assets/og-cover.jpg","telephone":"+825082024743","email":"help@matalk.kr","priceRange":"₩₩","areaServed":"서울 성동구","openingHoursSpecification":{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],"opens":"00:00","closes":"23:59"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.96","reviewCount":2380,"bestRating":"5"},"review":[{"@type":"Review","author":{"@type":"Person","name":"신O경"},"reviewRating":{"@type":"Rating","ratingValue":5,"bestRating":"5"},"reviewBody":"야근 끝나고 스웨디시 예약했어요. 왕십리 집까지 43분 만에 도착하셨고 다음 날 몸이 한결 가벼웠습니다."},{"@type":"Review","author":{"@type":"Person","name":"최O서"},"reviewRating":{"@type":"Rating","ratingValue":4,"bestRating":"5"},"reviewBody":"어깨 뭉친 게 심했는데 스웨디시로 집중해서 풀어주셨어요. 성수동까지 도착도 빨랐습니다."},{"@type":"Review","author":{"@type":"Person","name":"임O아"},"reviewRating":{"@type":"Rating","ratingValue":4,"bestRating":"5"},"reviewBody":"옥수동 신혼집에서 타이 받았는데 분위기도 편안하고 마무리까지 정갈했어요."},{"@type":"Review","author":{"@type":"Person","name":"이O연"},"reviewRating":{"@type":"Rating","ratingValue":5,"bestRating":"5"},"reviewBody":"가격도 예약할 때 들은 그대로였고 추가 요구 전혀 없었어요. 왕십리에서 로미로미 강추합니다."},{"@type":"Review","author":{"@type":"Person","name":"윤O지"},"reviewRating":{"@type":"Rating","ratingValue":5,"bestRating":"5"},"reviewBody":"타이 받았는데 성수동까지 생각보다 빨리 와주셔서 놀랐어요. 압도 딱 좋았습니다."},{"@type":"Review","author":{"@type":"Person","name":"박O현"},"reviewRating":{"@type":"Rating","ratingValue":5,"bestRating":"5"},"reviewBody":"로미로미 받았는데 성수동까지 생각보다 빨리 와주셔서 놀랐어요. 압도 딱 좋았습니다."}]},{"@type":"AdministrativeArea","name":"서울 성동구"},{"@type":"Service","name":"성동구 출장마사지","provider":{"@id":"https://matalk.kr/#org"},"areaServed":{"@type":"AdministrativeArea","name":"서울 성동구"},"description":"성동구 전역 24시간 출장 건강관리 서비스"}]}</script>
 </head><body><header><nav class="nav" aria-label="주 메뉴">
 <a class="brand" href="/" aria-label="마톡 출장마사지 홈"><b>마톡</b> <span>massage</span></a>
 <button class="toggle" aria-expanded="false" aria-controls="primary-menu" aria-label="메뉴 열기">☰</button>
@@ -266,11 +278,15 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
 <li><a href="/magazine/">매거진</a></li>
 <li><a href="/reviews/">후기</a></li>
 <li><a href="/about/">소개</a></li>
-<li><a class="cta-pill" href="tel:+820000000000">24시 예약</a></li>
+<li><a class="cta-pill" href="tel:+825082024743">24시 예약</a></li>
 </ul></nav></header><section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px"><div class="breadcrumb"><a href="/">홈</a> <span style='color:var(--dim)'>›</span> <a href="/locations/">지역</a> <span style='color:var(--dim)'>›</span> <a href="/locations/seoul/">서울</a> <span style='color:var(--dim)'>›</span> 성동구</div>
 <span class="eyebrow"><span class="pulse"></span>SEOUL · 성동구 OPERATIONS</span>
 <h1>성동구 <span class="grad">출장마사지</span></h1>
 <p class="lead">신흥 오피스·카페 밀집 권역. 서울숲, 성수카페거리 일대를 포함한 성동구 전역에 24시간 배차합니다.</p>
+<div class="actions">
+  <a class="btn btn-primary" href="tel:+825082024743">📞 성동구 전화 예약 0508-202-4743</a>
+  <a class="btn btn-ghost" href="/pricing/">요금 보기</a>
+</div>
 <div class="chips">
   <div class="chip"><small>평균 도착</small><b>약 38분</b></div>
   <div class="chip"><small>운영</small><b>24시간 연중무휴</b></div>
@@ -285,7 +301,7 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
 <span class="eyebrow"><span class="pulse"></span>RESERVE TONIGHT</span>
 <h2>성동구, 가장 가까운 관리사를 배차해 드립니다</h2><p>전화 또는 카카오톡으로 지역과 코스를 알려주시면 본사 디스패처가 예상 도착 시간을 즉시 안내드립니다.</p>
 <div class="actions" style="justify-content:center">
-<a class="btn btn-primary" href="tel:+820000000000">전화 예약 0000-0000 →</a>
+<a class="btn btn-primary" href="tel:+825082024743">전화 예약 0508-202-4743 →</a>
 <a class="btn btn-ghost" href="/pricing/">요금 보기</a>
 </div></div></section><footer class="site-footer"><div class="footer-wrap">
 <div class="footer-grid">
@@ -302,7 +318,7 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
 </div>
 <div class="footer-ops">
   <div class="blk"><small>운영 시간</small><b>24시간 연중무휴</b></div>
-  <div class="blk"><small>고객센터</small><b><a href="tel:+820000000000">0000-0000</a> · help@matalk.kr</b></div>
+  <div class="blk"><small>고객센터</small><b><a href="tel:+825082024743">0508-202-4743</a> · help@matalk.kr</b></div>
 </div>
 <div class="company-info"><div><span class="lbl">회사명</span>마톡</div><div><span class="lbl">대표자</span>[대표자명]</div><div><span class="lbl">사업자등록번호</span>[사업자등록번호]</div><div><span class="lbl">주소</span>[사업장 주소]</div><div><span class="lbl">통신판매업신고</span>[통신판매업신고번호]</div><div><span class="lbl">개인정보보호책임자</span>[개인정보보호책임자]</div></div>
 <div class="footer-policies">
@@ -317,6 +333,9 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
   © 2026 마톡 출장마사지. All rights reserved.
 </div>
 </div></footer>
+<nav class="callbar" aria-label="빠른 예약">
+  <a class="c-call" href="tel:+825082024743" aria-label="전화 예약 0508-202-4743">📞 24시 전화 예약 0508-202-4743</a>
+</nav>
 <script>
 function idle(fn){if('requestIdleCallback'in window){requestIdleCallback(fn,{timeout:1500})}else{setTimeout(fn,1)}}
 idle(function(){

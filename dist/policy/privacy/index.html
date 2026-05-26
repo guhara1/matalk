@@ -223,6 +223,18 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
 .reveal{opacity:0;transform:translateY(20px);transition:.8s}
 .reveal.in{opacity:1;transform:none}
 
+/* MOBILE FIXED CALL BAR */
+.callbar{display:none}
+.callbar a{display:flex;align-items:center;justify-content:center;gap:8px}
+@media(max-width:1100px){
+  .callbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:120;
+    padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));
+    background:rgba(11,11,14,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+  .callbar .c-call{flex:1;background:var(--grad);color:#1a1108;font-weight:800;font-size:15.5px;
+    padding:15px;border-radius:13px}
+  body{padding-bottom:78px}
+}
+
 /* CONTENT VISIBILITY */
 .cv{content-visibility:auto;contain-intrinsic-size:auto 700px}
 
@@ -266,7 +278,7 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
 <li><a href="/magazine/">매거진</a></li>
 <li><a href="/reviews/">후기</a></li>
 <li><a href="/about/">소개</a></li>
-<li><a class="cta-pill" href="tel:+820000000000">24시 예약</a></li>
+<li><a class="cta-pill" href="tel:+825082024743">24시 예약</a></li>
 </ul></nav></header><section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px"><div class="breadcrumb"><a href="/">홈</a> <span style='color:var(--dim)'>›</span> 개인정보처리방침</div>
 <h1 style="font-size:clamp(28px,4vw,44px)">개인정보처리방침</h1></div></section><section class="wrap cv" style="max-width:760px"><h2 style="font-size:21px;margin:32px 0 12px">1. 수집하는 개인정보 항목</h2><p style="color:#c8c8d0;font-size:14.5px;line-height:1.8;margin-bottom:12px">마톡은 예약 처리를 위해 최소한의 정보(연락처, 예약 지역, 희망 코스·시간)를 수집합니다.</p><p style="color:#c8c8d0;font-size:14.5px;line-height:1.8;margin-bottom:12px">마케팅 목적의 별도 정보 수집은 동의를 받은 경우에 한합니다.</p><h2 style="font-size:21px;margin:32px 0 12px">2. 개인정보의 이용 목적</h2><p style="color:#c8c8d0;font-size:14.5px;line-height:1.8;margin-bottom:12px">수집된 정보는 예약 확정, 관리사 배차, 고객 응대 목적으로만 이용합니다.</p><p style="color:#c8c8d0;font-size:14.5px;line-height:1.8;margin-bottom:12px">법령에 따른 경우를 제외하고 제3자에게 제공하지 않습니다.</p><h2 style="font-size:21px;margin:32px 0 12px">3. 보유 및 이용 기간</h2><p style="color:#c8c8d0;font-size:14.5px;line-height:1.8;margin-bottom:12px">예약 처리 완료 후 관련 법령이 정한 기간 동안 보관하며, 기간 경과 시 지체 없이 파기합니다.</p><h2 style="font-size:21px;margin:32px 0 12px">4. 개인정보보호책임자</h2><p style="color:#c8c8d0;font-size:14.5px;line-height:1.8;margin-bottom:12px">개인정보보호책임자: [개인정보보호책임자]</p><p style="color:#c8c8d0;font-size:14.5px;line-height:1.8;margin-bottom:12px">문의: help@matalk.kr</p><h2 style="font-size:21px;margin:32px 0 12px">5. 이용자의 권리</h2><p style="color:#c8c8d0;font-size:14.5px;line-height:1.8;margin-bottom:12px">이용자는 자신의 개인정보 열람·정정·삭제를 요청할 수 있으며, 요청 시 지체 없이 조치합니다.</p></section><footer class="site-footer"><div class="footer-wrap">
 <div class="footer-grid">
@@ -283,7 +295,7 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
 </div>
 <div class="footer-ops">
   <div class="blk"><small>운영 시간</small><b>24시간 연중무휴</b></div>
-  <div class="blk"><small>고객센터</small><b><a href="tel:+820000000000">0000-0000</a> · help@matalk.kr</b></div>
+  <div class="blk"><small>고객센터</small><b><a href="tel:+825082024743">0508-202-4743</a> · help@matalk.kr</b></div>
 </div>
 <div class="company-info"><div><span class="lbl">회사명</span>마톡</div><div><span class="lbl">대표자</span>[대표자명]</div><div><span class="lbl">사업자등록번호</span>[사업자등록번호]</div><div><span class="lbl">주소</span>[사업장 주소]</div><div><span class="lbl">통신판매업신고</span>[통신판매업신고번호]</div><div><span class="lbl">개인정보보호책임자</span>[개인정보보호책임자]</div></div>
 <div class="footer-policies">
@@ -298,6 +310,9 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
   © 2026 마톡 출장마사지. All rights reserved.
 </div>
 </div></footer>
+<nav class="callbar" aria-label="빠른 예약">
+  <a class="c-call" href="tel:+825082024743" aria-label="전화 예약 0508-202-4743">📞 24시 전화 예약 0508-202-4743</a>
+</nav>
 <script>
 function idle(fn){if('requestIdleCallback'in window){requestIdleCallback(fn,{timeout:1500})}else{setTimeout(fn,1)}}
 idle(function(){

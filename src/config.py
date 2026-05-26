@@ -8,9 +8,9 @@ BRAND_FULL = "마톡 출장마사지"
 BRAND_EN = "Matalk"
 LEGAL_NAME = "마톡"
 
-# 연락처 — 도메인 연결 전 실제 값으로 교체하세요. (플레이스홀더)
-PHONE = "0000-0000"            # 표시용
-PHONE_TEL = "+820000000000"    # tel: 링크용
+# 연락처
+PHONE = "0508-202-4743"            # 표시용
+PHONE_TEL = "+825082024743"        # tel: 링크용 (0508-202-4743)
 EMAIL = "help@matalk.kr"
 KAKAO = "@마톡"
 
