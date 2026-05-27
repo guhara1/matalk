@@ -208,7 +208,7 @@ def main():
     builders = [
         pages.build_index, pages.build_services, pages.build_therapists, pages.build_pricing,
         pages2.build_locations_hub, pages2.build_region_hubs, pages2.build_districts,
-        pages2.build_seoul_dongs,
+        pages2.build_dongs,
         pages2.build_magazine, pages2.build_reviews, pages2.build_about, pages2.build_policies,
     ]
     written = []

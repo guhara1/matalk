@@ -183,7 +183,7 @@ def _district_page(r, d):
 </div></div></section>"""
     ov_head = section_head("OVERVIEW", f"{d['kr']} 운영 데이터")
     fn_head = section_head("FIELD NOTES · 2026", f"{d['kr']} 권역 노트")
-    dongs = D.SEOUL_DONGS.get(d["slug"]) if r["slug"] == "seoul" else None
+    dongs = D.DONGS.get(d["slug"])
     if dongs:
         dong_cards = "".join(
             f'<a class="card reveal" href="/locations/{r["slug"]}/{d["slug"]}/{dg["slug"]}/">'
@@ -223,14 +223,16 @@ def _district_page(r, d):
 # ─────────────────────────────────────────────
 # 행정동 페이지 (서울 핵심 구 시범)
 # ─────────────────────────────────────────────
-def build_seoul_dongs():
+def build_dongs():
     out = []
-    seoul = next(rr for rr in D.REGIONS if rr["slug"] == "seoul")
-    by_slug = {dd["slug"]: dd for dd in seoul["districts"]}
-    for dist_slug, dlist in D.SEOUL_DONGS.items():
-        d = by_slug[dist_slug]
+    lookup = {}
+    for rr in D.REGIONS:
+        for dd in rr["districts"]:
+            lookup[dd["slug"]] = (rr, dd)
+    for dist_slug, dlist in D.DONGS.items():
+        rr, dd = lookup[dist_slug]
         for dg in dlist:
-            out.append(_dong_page(seoul, d, dg))
+            out.append(_dong_page(rr, dd, dg))
     return out
 
 
