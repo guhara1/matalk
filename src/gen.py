@@ -257,3 +257,164 @@ def meta_desc(r, d, avg, arrivals):
               "dt": josa(d["kr"], "은는"), "fat": josa(fast[0], "은는")}
     tpl = _DESC_TEMPLATES[_seed(d["slug"] + "desc") % len(_DESC_TEMPLATES)]
     return tpl.format(**fields)
+
+
+# ═════════════════════════════════════════════
+# 행정동(洞) 단위 콘텐츠 생성기 (서울 시범)
+# ═════════════════════════════════════════════
+def dong_facts(region, district, dong):
+    sd = _seed("dong:" + district["slug"] + ":" + dong["slug"])
+    return {
+        "rg": region["kr"], "d": district["kr"], "dong": dong["kr"],
+        "lm": dong["lm"], "char": dong["char"],
+        "avg": 24 + sd % 18,
+        "peak": 44 + sd % 14, "night": 15 + (sd >> 3) % 13, "repeat": 33 + (sd >> 5) % 22,
+        "kw": _COURSE_KW[(sd >> 2) % len(_COURSE_KW)],
+        "dongt": josa(dong["kr"], "은는"), "dongi": josa(dong["kr"], "이가"),
+        "lmobj": josa(dong["lm"], "을를"),
+    }
+
+
+_DA_ARR = [
+    "{lm} 일대까지 우회 없이 진입하는 동선이라 도착 시간이 비교적 일정합니다.",
+    "{dong} 안에서도 {lm} 인근은 예약이 몰려 피크 시간엔 수 분 더 걸릴 수 있습니다.",
+    "인접 동에 대기 중인 관리사가 있으면 {dong} 도착은 평균보다 더 단축됩니다.",
+    "{d} 내 다른 동선과 묶어 배차해 {dong} 공차 이동을 줄입니다.",
+    "교통 변동이 크면 예약 단계에서 {dong} 예상 도착 시간을 다시 안내드립니다.",
+]
+_DA_TIME = [
+    "주말에는 {dong} 오전 예약 비중이 평일보다 올라갑니다.",
+    "{lm} 주변 숙소·오피스 수요로 {dong} 야간 콜이 특히 꾸준합니다.",
+    "{dong} 재방문 비율은 약 {repeat}%로 단골 예약이 일정 부분을 차지합니다.",
+    "심야에도 {dong} 배차가 끊기지 않도록 야간 대기 인원을 둡니다.",
+    "연휴에는 {dong} 예약이 전 시간대에 고르게 분산됩니다.",
+]
+_DA_COURSE = [
+    "{lm} 인근 자택·숙소 예약이 많아 이동이 간편하면서 회복감이 큰 구성을 안내합니다.",
+    "예약 시 컨디션과 신경 쓰이는 부위를 알려주시면 {dong}에서도 압과 부위를 조율합니다.",
+    "{dong}에서는 90분 선택 비중이 높아 깊은 이완을 원하면 120분을 권합니다.",
+    "처음이라면 부담이 적은 스웨디시 60분부터 시작하는 것을 권합니다.",
+]
+_DA_PAY = [
+    "코스와 시간은 예약 시 확정되어 {dong} 현장에서 추가 비용이 붙지 않습니다.",
+    "관리사 출발 전 취소는 전액 환불되며, 출발 이후 기준은 예약 시 안내드립니다.",
+    "{dong}도 출장비 없이 표시 요금 그대로 진행합니다.",
+    "심야·주말이라도 {dong} 요금에 할증을 붙이지 않습니다.",
+    "결제 방식은 예약 단계에서 안내하며 정찰 요금을 그대로 적용합니다.",
+]
+_DA_AREA = [
+    "이 동선을 기준으로 {dong} 주요 생활권에서 콜이 집중됩니다.",
+    "{dong} 일대의 상권·주거 변화는 분기별로 배차 데이터에 반영해 동선을 조정합니다.",
+    "{rg} {d} 안에서도 {dong}만의 수요 패턴에 맞춰 대기 위치를 따로 둡니다.",
+    "{lm} 방문 고객이 자택·숙소로 이어 예약하는 경우도 적지 않습니다.",
+]
+_DA_DISPATCH = [
+    "피크 시간대에는 사전 대기 인원을 늘려 {dong} 평균 도착 시간을 관리합니다.",
+    "교통 상황에 따라 예상 시간이 바뀌면 예약 단계에서 다시 안내드립니다.",
+    "{d} 인접 동과 묶어 운영해 {dong} 대기 공백이 생기지 않도록 합니다.",
+    "심야에도 {dong} 담당 야간 대기 관리사를 두어 배차가 끊기지 않습니다.",
+]
+_DA_SAFETY = [
+    "코스별 강도·부위 기준은 안전 자문 트레이너 박지연 트레이너의 가이드라인을 따릅니다.",
+    "통증·질환이 있는 부위는 사전에 알려주시면 피하거나 강도를 낮춰 진행합니다.",
+    "{dong} 야간 예약에도 주간과 동일한 안전 기준이 그대로 적용됩니다.",
+    "관리사는 정기 재교육으로 응대·안전 매뉴얼을 갱신합니다.",
+]
+_DA_LEGAL = [
+    "마톡 출장마사지는 의료 행위가 아닌 건강관리·휴식 서비스로, 만 19세 이상을 대상으로 합니다.",
+    "{dong}에서 제공되는 모든 코스는 치료가 아닌 휴식·컨디션 관리 목적이며 만 19세 이상만 이용할 수 있습니다.",
+    "본 서비스는 건강관리·휴식 목적의 출장 서비스로, 미성년자 이용을 제한합니다.",
+]
+
+
+def dong_overview_notes(region, district, dong):
+    f = dong_facts(region, district, dong)
+    sd = _seed("dov:" + district["slug"] + dong["slug"])
+    return [
+        ("도착 시간과 진입 동선", [
+            f"{f['rg']} {f['d']} {f['dongt']} 호출 후 평균 약 {f['avg']}분에 방문하며, {f['lm']} 방면 동선을 기준으로 대기 위치를 잡습니다.",
+            *[s.format(**f) for s in _choose(sd + 1, _DA_ARR, 3)],
+        ]),
+        ("시간대별 예약 분포", [
+            f"{f['dong']} 콜의 약 {f['peak']}%가 저녁 7시 이후 야간에 집중되고, 자정~새벽 심야 비중도 약 {f['night']}%에 이릅니다.",
+            *[s.format(**f) for s in _choose(sd + 2, _DA_TIME, 2)],
+        ]),
+        ("권역 성격에 맞는 추천 코스", [
+            f"{f['dongt']} {f['char']}으로, {f['kw']} 코스 문의가 많고 평균 {f['avg']}분 도착에 맞춰 90분 구성을 우선 추천합니다.",
+            *[s.format(**f) for s in _choose(sd + 3, _DA_COURSE, 2)],
+        ]),
+        ("예약·결제·환불 안내", [
+            f"{f['dong']} 예약은 전화 또는 카카오톡으로 코스·시간만 알려주시면 즉시 확정됩니다.",
+            *[s.format(**f) for s in _choose(sd + 4, _DA_PAY, 2)],
+        ]),
+    ]
+
+
+def dong_field_notes(region, district, dong):
+    f = dong_facts(region, district, dong)
+    sd = _seed("dfn:" + district["slug"] + dong["slug"])
+    legal = _choose(sd + 9, _DA_LEGAL, 1)[0].format(**f)
+    return [
+        ("동(洞)의 특징", [
+            f"{f['dongt']} {f['char']}으로, {f['lmobj']} 중심으로 생활·이동 동선이 형성됩니다.",
+            *[s.format(**f) for s in _choose(sd + 1, _DA_AREA, 2)],
+        ]),
+        ("관리사 배치와 도착 관리", [
+            f"{f['dong']} 내부와 인접 동에 관리사를 분산 대기시켜, 호출 후 평균 {f['avg']}분 내 도착을 목표로 운영합니다.",
+            *[s.format(**f) for s in _choose(sd + 2, _DA_DISPATCH, 2)],
+        ]),
+        ("안전 가이드 — 자문 트레이너 감수", [
+            f"{f['dong']}에 배차되는 모든 관리사는 신원 확인과 표준 안전 교육을 이수한 인원으로 한정합니다.",
+            *[s.format(**f) for s in _choose(sd + 3, _DA_SAFETY, 2)],
+        ]),
+        ("결제·예약 운영 원칙", [
+            f"{f['dong']} 예약 시 확정된 금액 외 현장 추가 요구는 일절 없습니다.",
+            legal,
+            _choose(sd + 4, ["불법·퇴폐 서비스를 제공하지 않으며, 위반 시 즉시 배차를 중단합니다.",
+                             f"{f['dong']} 관련 문의나 불편 사항은 본사 고객센터로 알려주시면 즉시 조치합니다."], 1)[0],
+        ]),
+    ]
+
+
+def dong_reviews(district, dong, n=6):
+    out = []
+    for i in range(n):
+        sd = _seed("drev:" + district["slug"] + dong["slug"] + str(i))
+        tmpl, who = _REVIEW_BANK[sd % len(_REVIEW_BANK)]
+        course = _COURSES[(sd >> 2) % len(_COURSES)]
+        nick = _NICKS[(sd >> 4) % len(_NICKS)]
+        mins = 24 + (sd >> 6) % 18
+        rating = 5 if sd % 5 else 4
+        body = tmpl.format(course=course, area=dong["kr"], min=mins, nick=nick)
+        whos = who.format(area=dong["kr"], nick=nick)
+        out.append({"body": body, "who": whos, "rating": rating, "author": nick})
+    return out
+
+
+_DONG_TITLE = [
+    "{dong} 출장마사지 — {d} {dong} 24시간 방문 | 마톡",
+    "{d} {dong} 출장마사지 | {lm} 평균 {avg}분 방문 — 마톡",
+    "{dong} 출장마사지 {lm} 24시간 방문관리 | 마톡",
+    "{dong} 방문 마사지 — {kw} 평균 {avg}분 | 마톡",
+    "{d} {dong} 출장마사지 후기·요금 | 마톡",
+    "{dong} 출장마사지 — {lm} 근처 심야 방문 | 마톡",
+]
+_DONG_DESC = [
+    "{rg} {d} {dong} 출장마사지. {lm} 일대 평균 {avg}분 방문, {kw} 24시간 예약.",
+    "{dongt} {char}. {lm} 인근 평균 {avg}분, 동 단위 도착·후기·요금 안내.",
+    "{dong} 방문 마사지 — {kw} 평균 {avg}분, 심야 예약. 만 19세 이상 건강관리.",
+    "{d} {dong} 24시간 출장마사지. {lm} 근처 평균 {avg}분, 정찰 요금.",
+    "{rg} {d} {dong} 출장마사지 평균 {avg}분. {kw} 코스를 컨디션에 맞춰 안내.",
+]
+
+
+def dong_meta_title(region, district, dong):
+    f = dong_facts(region, district, dong)
+    tpl = _DONG_TITLE[_seed("dt:" + district["slug"] + dong["slug"]) % len(_DONG_TITLE)]
+    return tpl.format(**f)
+
+
+def dong_meta_desc(region, district, dong):
+    f = dong_facts(region, district, dong)
+    tpl = _DONG_DESC[_seed("dd:" + district["slug"] + dong["slug"]) % len(_DONG_DESC)]
+    return tpl.format(**f)

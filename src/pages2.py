@@ -183,6 +183,16 @@ def _district_page(r, d):
 </div></div></section>"""
     ov_head = section_head("OVERVIEW", f"{d['kr']} 운영 데이터")
     fn_head = section_head("FIELD NOTES · 2026", f"{d['kr']} 권역 노트")
+    dongs = D.SEOUL_DONGS.get(d["slug"]) if r["slug"] == "seoul" else None
+    if dongs:
+        dong_cards = "".join(
+            f'<a class="card reveal" href="/locations/{r["slug"]}/{d["slug"]}/{dg["slug"]}/">'
+            f'<div class="k">{esc(dg["lm"])}</div><h3>{esc(dg["kr"])} 출장마사지</h3>'
+            f'<p>{esc(dg["char"])}</p><div class="arrow">자세히 →</div></a>'
+            for dg in dongs)
+        dong_head = section_head("ADMINISTRATIVE DONG", f"{d['kr']} 행정동별 안내")
+        html += (f'<section class="wrap cv" style="padding-top:0">{dong_head}'
+                 f'<div class="grid g3">{dong_cards}</div></section>')
     html += f'<section class="wrap cv">{ov_head}{note_cards(overview, start=5)}</section>'
     html += f'<section class="wrap cv" style="padding-top:0">{fn_head}{note_cards(fnotes, start=1)}</section>'
 
@@ -208,6 +218,104 @@ def _district_page(r, d):
     html += cta_band(f"{d['kr']}, 가장 가까운 관리사를 배차해 드립니다")
     html += footer()
     return (f"/locations/{r['slug']}/{d['slug']}/index.html", html)
+
+
+# ─────────────────────────────────────────────
+# 행정동 페이지 (서울 핵심 구 시범)
+# ─────────────────────────────────────────────
+def build_seoul_dongs():
+    out = []
+    seoul = next(rr for rr in D.REGIONS if rr["slug"] == "seoul")
+    by_slug = {dd["slug"]: dd for dd in seoul["districts"]}
+    for dist_slug, dlist in D.SEOUL_DONGS.items():
+        d = by_slug[dist_slug]
+        for dg in dlist:
+            out.append(_dong_page(seoul, d, dg))
+    return out
+
+
+def _dong_page(r, d, dg):
+    path = f"/locations/{r['slug']}/{d['slug']}/{dg['slug']}/"
+    trail = [("홈", "/"), ("지역", "/locations/"), (r["kr"], f"/locations/{r['slug']}/"),
+             (d["kr"], f"/locations/{r['slug']}/{d['slug']}/"), (dg["kr"], None)]
+    f = gen.dong_facts(r, d, dg)
+    avg = f["avg"]
+    dongt = gen.josa(dg["kr"], "은는")
+    overview = gen.dong_overview_notes(r, d, dg)
+    fnotes = gen.dong_field_notes(r, d, dg)
+    revs = gen.dong_reviews(d, dg, 6)
+
+    faq = [
+        (f"{dg['kr']} 출장마사지는 도착까지 얼마나 걸리나요?",
+         f"{dongt} 호출 후 평균 약 {avg}분에 방문하며, {dg['lm']} 방면은 더 빠를 수 있습니다."),
+        (f"{dg['kr']}에서 심야에도 예약되나요?",
+         f"예. {dongt} 24시간 연중무휴로 운영해 심야·새벽에도 예약과 배차가 가능합니다."),
+        (f"{dg['kr']} 요금은 다른 동과 다른가요?",
+         "동일한 코스별 표시 요금이 적용되며, 출장비·할증 없이 예약 시 확정 금액 그대로입니다."),
+        (f"{dg['kr']}에서 어떤 코스가 인기인가요?",
+         f"{dongt} {f['kw']} 코스 문의가 많으며, 예약 시 컨디션에 맞춰 압과 부위를 조율합니다."),
+    ]
+
+    review_jsonld = [{"@type": "Review", "author": {"@type": "Person", "name": rv["author"]},
+                      "reviewRating": {"@type": "Rating", "ratingValue": rv["rating"], "bestRating": "5"},
+                      "reviewBody": rv["body"]} for rv in revs]
+    lb = localbusiness_jsonld(area=f"{r['kr']} {d['kr']} {dg['kr']}",
+                              name=f"{C.BRAND_FULL} {dg['kr']}", url=C.DOMAIN + path)
+    lb["review"] = review_jsonld
+    blocks = [
+        breadcrumb_jsonld(trail), faq_jsonld(faq),
+        jsonld({"@context": "https://schema.org", "@graph": [
+            lb,
+            {"@type": "AdministrativeArea", "name": f"{r['kr']} {d['kr']} {dg['kr']}"},
+            {"@type": "Service", "name": f"{dg['kr']} 출장마사지", "provider": {"@id": C.DOMAIN + "/#org"},
+             "areaServed": {"@type": "AdministrativeArea", "name": f"{r['kr']} {d['kr']} {dg['kr']}"},
+             "description": f"{dg['kr']} 전역 24시간 출장 건강관리 서비스"},
+        ]}),
+    ]
+
+    html = head(gen.dong_meta_title(r, d, dg), gen.dong_meta_desc(r, d, dg),
+                path, jsonld_blocks=blocks, prefetch=["/pricing/"])
+    html += header()
+    html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
+<span class="eyebrow"><span class="pulse"></span>{esc(d['kr'])} · {esc(dg['kr'])}</span>
+<h1>{esc(dg['kr'])} <span class="grad">출장마사지</span></h1>
+<p class="lead">{esc(dg['char'])}. {esc(dg['lm'])} 일대를 포함한 {esc(dg['kr'])} 전역에 24시간 방문합니다.</p>
+<div class="actions">
+  <a class="btn btn-primary" href="tel:{C.PHONE_TEL}">📞 {esc(dg['kr'])} 전화 예약 {esc(C.PHONE)}</a>
+  <a class="btn btn-ghost" href="/locations/{r['slug']}/{d['slug']}/">{esc(d['kr'])} 전체</a>
+</div>
+<div class="chips">
+  <div class="chip"><small>평균 도착</small><b>약 {avg}분</b></div>
+  <div class="chip"><small>운영</small><b>{esc(C.HOURS)}</b></div>
+  <div class="chip"><small>랜드마크</small><b>{esc(dg['lm'])}</b></div>
+</div></div></section>"""
+    ov_head = section_head("OVERVIEW", f"{dg['kr']} 운영 데이터")
+    fn_head = section_head("FIELD NOTES", f"{dg['kr']} 동 노트")
+    html += f'<section class="wrap cv">{ov_head}{note_cards(overview, start=1)}</section>'
+    html += f'<section class="wrap cv" style="padding-top:0">{fn_head}{note_cards(fnotes, start=5)}</section>'
+
+    html += f"""<section class="wrap cv" style="padding-top:0">{section_head("DATA & METHODOLOGY", "데이터 출처")}
+<div class="data-box reveal">
+  <h3>{esc(dg['kr'])} 도착 시간 산출 근거</h3>
+  <p>위 평균 도착 시간은 {S['months']}개월간 누적된 {r['kr']} {d['kr']} 권역 배차 로그를 {dg['kr']} 단위로 집계한 1차 데이터입니다.</p>
+  <p>교통 상황·시간대에 따라 실제 도착 시간은 달라질 수 있으며, 예약 시 예상 시간을 다시 안내드립니다.</p>
+  <p class="src">출처: 마톡 본사 디스패치 로그 · {esc(dg['kr'])} 집계(2025.10–2026.05). 분기별 갱신.</p>
+  <p class="src">작성 <a href="/about/" style="color:var(--rose)">마톡 편집팀</a> · 감수 박지연(안전 자문 트레이너) · 최종 갱신 2026-05</p>
+</div></section>"""
+
+    html += f'<section class="wrap cv" style="padding-top:0">{section_head("PRICING", "코스 요금")}{price_grid(D.SERVICES)}</section>'
+
+    rev_cards = "".join(
+        f'<div class="review reveal"><div class="stars">{"★"*rv["rating"]}{"☆"*(5-rv["rating"])}</div>'
+        f'<p>{esc(rv["body"])}</p><div class="who">{esc(rv["who"])}</div></div>' for rv in revs)
+    rv_head = section_head("REVIEWS", f"{dg['kr']} 이용 후기")
+    html += f'<section class="wrap cv" style="padding-top:0">{rv_head}<div class="grid g3">{rev_cards}</div></section>'
+
+    faq_head = section_head("FAQ", f"{dg['kr']} 자주 묻는 질문")
+    html += f'<section class="wrap cv" style="padding-top:0">{faq_head}{faq_block(faq)}</section>'
+    html += cta_band(f"{dg['kr']}, 가장 가까운 관리사를 배차해 드립니다")
+    html += footer()
+    return (path + "index.html", html)
 
 
 # ─────────────────────────────────────────────
