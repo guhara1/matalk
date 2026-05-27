@@ -104,18 +104,51 @@ def _render(size, *, maskable=False):
     return bytes(px)
 
 
-def _png(size, raw):
+def _png(w, raw, h=None):
+    h = h or w
     def chunk(typ, data):
         c = struct.pack(">I", len(data)) + typ + data
         return c + struct.pack(">I", zlib.crc32(typ + data) & 0xFFFFFFFF)
     sig = b"\x89PNG\r\n\x1a\n"
-    ihdr = struct.pack(">IIBBBBB", size, size, 8, 6, 0, 0, 0)  # RGBA
+    ihdr = struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0)  # RGBA
     idat = zlib.compress(raw, 9)
     return sig + chunk(b"IHDR", ihdr) + chunk(b"IDAT", idat) + chunk(b"IEND", b"")
 
 
 def png_bytes(size, maskable=False):
     return _png(size, _render(size, maskable=maskable))
+
+
+def _render_cover(w, h):
+    """1200x630 OG 커버: 다크 배경 그라데이션 + 중앙 로즈골드 말풍선."""
+    px = bytearray()
+    cx, cy = w / 2, h / 2
+    s = min(w, h)                         # 말풍선 기준 정사각 크기
+    bx0, by0 = cx - s / 2, cy - s / 2     # 말풍선 영역 좌상단
+    bg_diag = math.hypot(w, h) / 2
+    for y in range(h):
+        row = bytearray([0])
+        for x in range(w):
+            fx, fy = (x + 0.5 - bx0) / s, (y + 0.5 - by0) / s
+            if 0 <= fx <= 1 and 0 <= fy <= 1 and _in_bubble(fx, fy) and not _in_dot(fx, fy):
+                dist = math.hypot(x + 0.5 - cx, y + 0.5 - cy)
+                col = list(_grad(min(1.0, dist / (s * 0.42))))
+                hd = math.hypot(x - (bx0 + s * 0.36), y - (by0 + s * 0.30))
+                hl = max(0.0, 1 - hd / (s * 0.4))
+                for i in range(3):
+                    col[i] = min(255, round(col[i] + hl * 55))
+                row += bytes(col + [255])
+            else:
+                # 배경: 중앙에서 멀어질수록 더 어둡게
+                d = math.hypot(x - cx, y - cy) / bg_diag
+                v = max(0, round(18 - d * 12))
+                row += bytes([v, v, max(v, round(v * 1.1)), 255])
+        px += row
+    return bytes(px)
+
+
+def og_cover_bytes(w=1200, h=630):
+    return _png(w, _render_cover(w, h), h)
 
 
 def ico_bytes(size=32):

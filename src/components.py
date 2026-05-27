@@ -277,8 +277,16 @@ def jsonld(obj):
 # ─────────────────────────────────────────────
 def head(title, desc, path, *, jsonld_blocks=None, prefetch=None, og_image=None, extra_meta=""):
     url = C.DOMAIN + path
-    og_image = og_image or (C.DOMAIN + "/assets/og-cover.jpg")
-    blocks = "".join(jsonld_blocks or [])
+    og_image = og_image or (C.DOMAIN + "/assets/og-cover.png")
+    webpage = jsonld({
+        "@context": "https://schema.org", "@type": "WebPage",
+        "name": title, "description": desc, "url": url, "inLanguage": "ko-KR",
+        "isPartOf": {"@id": C.DOMAIN + "/#website"},
+        "primaryImageOfPage": {"@type": "ImageObject", "url": og_image,
+                               "width": 1200, "height": 630},
+        "image": og_image,
+    })
+    blocks = "".join(jsonld_blocks or []) + webpage
     pf = ""
     if prefetch:
         pf = "".join(f'<link rel="prefetch" href="{p}" as="document">' for p in prefetch)
@@ -303,8 +311,10 @@ def head(title, desc, path, *, jsonld_blocks=None, prefetch=None, og_image=None,
 <meta property="og:description" content="{esc(desc)}">
 <meta property="og:url" content="{url}">
 <meta property="og:image" content="{og_image}">
+<meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{esc(C.BRAND_FULL)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{esc(title)}">
 <meta name="twitter:description" content="{esc(desc)}">
@@ -501,7 +511,7 @@ def localbusiness_jsonld(area=None, name=None, url=None):
         "@type": "HealthAndBeautyBusiness",
         "@id": (url or C.DOMAIN + "/") + "#business",
         "name": name, "url": url or C.DOMAIN + "/",
-        "image": C.DOMAIN + "/assets/og-cover.jpg",
+        "image": C.DOMAIN + "/assets/og-cover.png",
         "telephone": C.PHONE_TEL, "email": C.EMAIL, "priceRange": "₩₩",
         "areaServed": area or "서울·경기·인천·부산",
         "openingHoursSpecification": {"@type": "OpeningHoursSpecification",

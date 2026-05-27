@@ -259,15 +259,12 @@ def main():
     }
     os.makedirs(os.path.join(OUT, "assets"), exist_ok=True)
     icon_files["assets/logo.png"] = icons.png_bytes(512)
-    icon_files["assets/og-cover.jpg"] = None  # placeholder note below
+    icon_files["assets/og-cover.png"] = icons.og_cover_bytes(1200, 630)
     for name, content in icon_files.items():
         if content is None:
             continue
         with open(os.path.join(OUT, name), "wb") as f:
             f.write(content)
-    # OG 커버는 1200x630 전용 이미지가 권장됩니다(플레이스홀더로 512 PNG 복사).
-    with open(os.path.join(OUT, "assets/og-cover.jpg"), "wb") as f:
-        f.write(icons.png_bytes(512))
 
     # ── 검증 리포트 ──
     print(f"✓ 생성 완료: {len(written)} 페이지 → {OUT}")

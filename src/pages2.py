@@ -492,7 +492,7 @@ def build_magazine():
                           "author": {"@type": "Organization", "name": C.AUTHOR, "url": C.DOMAIN + "/about/"},
                           "publisher": {"@id": C.DOMAIN + "/#org"},
                           "datePublished": m["date"], "dateModified": m["date"],
-                          "image": C.DOMAIN + "/assets/og-cover.jpg",
+                          "image": C.DOMAIN + "/assets/og-cover.png",
                           "mainEntityOfPage": C.DOMAIN + f"/magazine/{m['slug']}/"})]
         html = head(f"{m['title']} | 마톡 매거진",
                     m["desc"], f"/magazine/{m['slug']}/", jsonld_blocks=blocks)
@@ -689,15 +689,14 @@ def build_about():
 # ─────────────────────────────────────────────
 # 정책 페이지
 # ─────────────────────────────────────────────
-def _policy_page(slug, title, sections):
+def _policy_page(slug, title, sections, desc):
     trail = [("홈", "/"), (title, None)]
     body = ""
     for h, paras in sections:
         ps = "".join(f'<p style="color:#c8c8d0;font-size:14.5px;line-height:1.8;margin-bottom:12px">{esc(p)}</p>' for p in paras)
         body += f'<h2 style="font-size:21px;margin:32px 0 12px">{esc(h)}</h2>{ps}'
     blocks = [breadcrumb_jsonld(trail)]
-    html = head(f"{title} | 마톡 출장마사지",
-                f"마톡 출장마사지 {title}.", f"/policy/{slug}/", jsonld_blocks=blocks)
+    html = head(f"{title} | 마톡 출장마사지", desc, f"/policy/{slug}/", jsonld_blocks=blocks)
     html += header()
     html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
 <h1 style="font-size:clamp(28px,4vw,44px)">{esc(title)}</h1></div></section>"""
@@ -727,7 +726,7 @@ def build_policies():
         ("5. 이용자의 권리", [
             "이용자는 자신의 개인정보 열람·정정·삭제를 요청할 수 있으며, 요청 시 지체 없이 조치합니다.",
         ]),
-    ]))
+    ], "마톡이 예약 처리를 위해 수집하는 정보, 이용 목적, 보유 기간, 보호책임자와 이용자 권리를 안내합니다."))
     out.append(_policy_page("terms", "이용약관", [
         ("제1조 (목적)", [
             "본 약관은 마톡이 제공하는 출장 건강관리 서비스의 이용 조건과 절차를 규정합니다.",
@@ -745,7 +744,7 @@ def build_policies():
         ("제5조 (금지 행위)", [
             "이용자와 관리사 모두 불법 행위, 폭언, 신체적 위협 등을 해서는 안 되며, 위반 시 서비스가 즉시 중단됩니다.",
         ]),
-    ]))
+    ], "마톡 출장 건강관리 서비스의 성격, 예약·결제, 취소·환불, 금지 행위 등 이용 조건을 규정합니다."))
     out.append(_policy_page("youth", "청소년보호정책", [
         ("1. 기본 원칙", [
             "마톡은 만 19세 이상 성인을 대상으로 서비스를 제공하며, 청소년의 이용을 엄격히 제한합니다.",
@@ -760,5 +759,5 @@ def build_policies():
             f"청소년보호 책임자: {C.COMPANY['privacy_officer']}",
             f"문의: {C.EMAIL}",
         ]),
-    ]))
+    ], "마톡은 만 19세 이상 성인 대상 서비스로, 청소년 유해 정보 차단과 보호 책임자 운영 원칙을 안내합니다."))
     return out
