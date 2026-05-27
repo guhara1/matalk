@@ -183,8 +183,18 @@ def _district_page(r, d):
 </div></div></section>"""
     ov_head = section_head("OVERVIEW", f"{d['kr']} 운영 데이터")
     fn_head = section_head("FIELD NOTES · 2026", f"{d['kr']} 권역 노트")
+    gu_list = D.GYEONGGI_GU.get(d["slug"])
     dongs = D.DONGS.get(d["slug"])
-    if dongs:
+    if gu_list:
+        gu_cards = "".join(
+            f'<a class="card reveal" href="/locations/{r["slug"]}/{d["slug"]}/{g["slug"]}/">'
+            f'<div class="k">{esc(g["lm"])}</div><h3>{esc(g["kr"])} 출장마사지</h3>'
+            f'<p>{esc(g["char"])}</p><div class="arrow">행정동 보기 →</div></a>'
+            for g in gu_list)
+        gu_head = section_head("ADMINISTRATIVE GU", f"{d['kr']} 행정구별 안내")
+        html += (f'<section class="wrap cv" style="padding-top:0">{gu_head}'
+                 f'<div class="grid g3">{gu_cards}</div></section>')
+    elif dongs:
         dong_cards = "".join(
             f'<a class="card reveal" href="/locations/{r["slug"]}/{d["slug"]}/{dg["slug"]}/">'
             f'<div class="k">{esc(dg["lm"])}</div><h3>{esc(dg["kr"])} 출장마사지</h3>'
@@ -223,23 +233,39 @@ def _district_page(r, d):
 # ─────────────────────────────────────────────
 # 행정동 페이지 (서울 핵심 구 시범)
 # ─────────────────────────────────────────────
-def build_dongs():
-    out = []
-    lookup = {}
+def _city_lookup():
+    lk = {}
     for rr in D.REGIONS:
         for dd in rr["districts"]:
-            lookup[dd["slug"]] = (rr, dd)
-    for dist_slug, dlist in D.DONGS.items():
+            lk[dd["slug"]] = (rr, dd)
+    return lk
+
+
+def build_dongs():
+    out = []
+    lookup = _city_lookup()
+    for dist_slug, dlist in D.DONGS.items():       # 시/군/자치구 → 동
         rr, dd = lookup[dist_slug]
         for dg in dlist:
             out.append(_dong_page(rr, dd, dg))
+    for city_slug, gu_list in D.GYEONGGI_GU.items():  # 일반구 시 → 구 → 동
+        rr, dd = lookup[city_slug]
+        for g in gu_list:
+            for dg in g["dongs"]:
+                out.append(_dong_page(rr, dd, dg, gu=g))
     return out
 
 
-def _dong_page(r, d, dg):
-    path = f"/locations/{r['slug']}/{d['slug']}/{dg['slug']}/"
-    trail = [("홈", "/"), ("지역", "/locations/"), (r["kr"], f"/locations/{r['slug']}/"),
-             (d["kr"], f"/locations/{r['slug']}/{d['slug']}/"), (dg["kr"], None)]
+def _dong_page(r, d, dg, gu=None):
+    if gu:
+        base = f"/locations/{r['slug']}/{d['slug']}/{gu['slug']}/"
+        path = base + f"{dg['slug']}/"
+        trail = [("홈", "/"), ("지역", "/locations/"), (r["kr"], f"/locations/{r['slug']}/"),
+                 (d["kr"], f"/locations/{r['slug']}/{d['slug']}/"), (gu["kr"], base), (dg["kr"], None)]
+    else:
+        path = f"/locations/{r['slug']}/{d['slug']}/{dg['slug']}/"
+        trail = [("홈", "/"), ("지역", "/locations/"), (r["kr"], f"/locations/{r['slug']}/"),
+                 (d["kr"], f"/locations/{r['slug']}/{d['slug']}/"), (dg["kr"], None)]
     f = gen.dong_facts(r, d, dg)
     avg = f["avg"]
     dongt = gen.josa(dg["kr"], "은는")
@@ -316,6 +342,114 @@ def _dong_page(r, d, dg):
     faq_head = section_head("FAQ", f"{dg['kr']} 자주 묻는 질문")
     html += f'<section class="wrap cv" style="padding-top:0">{faq_head}{faq_block(faq)}</section>'
     html += cta_band(f"{dg['kr']}, 가장 가까운 관리사를 배차해 드립니다")
+    html += footer()
+    return (path + "index.html", html)
+
+
+# ─────────────────────────────────────────────
+# 행정구 페이지 (일반구 보유 시 — 시→구→동 중간 허브, 전체 콘텐츠)
+# ─────────────────────────────────────────────
+def build_gu():
+    out = []
+    lookup = _city_lookup()
+    for city_slug, gu_list in D.GYEONGGI_GU.items():
+        r, city = lookup[city_slug]
+        for g in gu_list:
+            out.append(_gu_page(r, city, g))
+    return out
+
+
+def _gu_page(r, city, g):
+    path = f"/locations/{r['slug']}/{city['slug']}/{g['slug']}/"
+    trail = [("홈", "/"), ("지역", "/locations/"), (r["kr"], f"/locations/{r['slug']}/"),
+             (city["kr"], f"/locations/{r['slug']}/{city['slug']}/"), (g["kr"], None)]
+    # 구를 행정구 수준 의사-district로 구성 → 동 단위 도착표·고유 콘텐츠 재사용
+    pseudo = {"kr": g["kr"], "slug": g["slug"],
+              "areas": [dg["kr"] for dg in g["dongs"]],
+              "landmarks": [g["lm"]], "character": g["char"]}
+    arrivals = gen.arrival_table(pseudo)
+    avg = round(sum(m for _, m in arrivals) / len(arrivals))
+    overview = gen.overview_notes(pseudo, r)[:3]   # 2500자 이내로 조정
+    fnotes = gen.field_notes(pseudo, r)
+    revs = gen.reviews(pseudo, 4)
+
+    faq = [
+        (f"{g['kr']} 출장마사지는 도착까지 얼마나 걸리나요?",
+         f"{g['kr']} 권역 평균 약 {avg}분입니다. {gen.josa(arrivals[0][0], '은는')} 약 {arrivals[0][1]}분 내외로 도착합니다."),
+        (f"{g['kr']}는 어느 동까지 출장이 되나요?",
+         f"{', '.join(pseudo['areas'])} 등 {g['kr']} 전역에 배차합니다."),
+        (f"{g['kr']}에서 심야에도 예약되나요?",
+         "예. 24시간 연중무휴로 운영해 심야·새벽에도 예약과 배차가 가능합니다."),
+        (f"{g['kr']} 요금은 다른 지역과 다른가요?",
+         "동일한 코스별 표시 요금이 적용되며, 출장비·할증 없이 예약 시 확정 금액 그대로입니다."),
+    ]
+    review_jsonld = [{"@type": "Review", "author": {"@type": "Person", "name": rv["author"]},
+                      "reviewRating": {"@type": "Rating", "ratingValue": rv["rating"], "bestRating": "5"},
+                      "reviewBody": rv["body"]} for rv in revs]
+    lb = localbusiness_jsonld(area=f"{r['kr']} {city['kr']} {g['kr']}",
+                              name=f"{C.BRAND_FULL} {g['kr']}", url=C.DOMAIN + path)
+    lb["review"] = review_jsonld
+    blocks = [
+        breadcrumb_jsonld(trail), faq_jsonld(faq),
+        jsonld({"@context": "https://schema.org", "@graph": [
+            lb,
+            {"@type": "AdministrativeArea", "name": f"{r['kr']} {city['kr']} {g['kr']}"},
+            {"@type": "Service", "name": f"{g['kr']} 출장마사지", "provider": {"@id": C.DOMAIN + "/#org"},
+             "areaServed": {"@type": "AdministrativeArea", "name": f"{r['kr']} {city['kr']} {g['kr']}"},
+             "description": f"{g['kr']} 전역 24시간 출장 건강관리 서비스"},
+        ]}),
+    ]
+
+    html = head(gen.meta_title(r, pseudo, avg), gen.meta_desc(r, pseudo, avg, arrivals),
+                path, jsonld_blocks=blocks, prefetch=["/pricing/"])
+    html += header()
+    html += f"""<section class="hero hero-compact"><div style="max-width:1240px;margin:0 auto;padding:0 24px">{breadcrumb(trail)}
+<span class="eyebrow"><span class="pulse"></span>{esc(city['kr'])} · {esc(g['kr'])}</span>
+<h1>{esc(g['kr'])} <span class="grad">출장마사지</span></h1>
+<p class="lead">{esc(g['char'])}. {esc(g['lm'])} 일대를 포함한 {esc(city['kr'])} {esc(g['kr'])} 전역에 24시간 방문합니다.</p>
+<div class="actions">
+  <a class="btn btn-primary" href="tel:{C.PHONE_TEL}">📞 {esc(g['kr'])} 전화 예약 {esc(C.PHONE)}</a>
+  <a class="btn btn-ghost" href="/locations/{r['slug']}/{city['slug']}/">{esc(city['kr'])} 전체</a>
+</div>
+<div class="chips">
+  <div class="chip"><small>평균 도착</small><b>약 {avg}분</b></div>
+  <div class="chip"><small>운영</small><b>{esc(C.HOURS)}</b></div>
+  <div class="chip"><small>행정동</small><b>{len(g['dongs'])}개</b></div>
+</div></div></section>"""
+
+    dong_cards = "".join(
+        f'<a class="card reveal" href="{path}{dg["slug"]}/">'
+        f'<div class="k">{esc(dg["lm"])}</div><h3>{esc(dg["kr"])} 출장마사지</h3>'
+        f'<p>{esc(dg["char"])}</p><div class="arrow">자세히 →</div></a>'
+        for dg in g["dongs"])
+    dong_head = section_head("ADMINISTRATIVE DONG", f"{g['kr']} 행정동별 안내")
+    html += f'<section class="wrap cv">{dong_head}<div class="grid g3">{dong_cards}</div></section>'
+
+    ov_head = section_head("OVERVIEW", f"{g['kr']} 운영 데이터")
+    fn_head = section_head("FIELD NOTES", f"{g['kr']} 권역 노트")
+    html += f'<section class="wrap cv" style="padding-top:0">{ov_head}{note_cards(overview, start=5)}</section>'
+    html += f'<section class="wrap cv" style="padding-top:0">{fn_head}{note_cards(fnotes, start=1)}</section>'
+
+    html += f"""<section class="wrap cv" style="padding-top:0">{section_head("DATA & METHODOLOGY", "데이터 출처")}
+<div class="data-box reveal">
+  <h3>{esc(g['kr'])} 도착 시간 산출 근거</h3>
+  <p>위 동별 도착 시간은 {S['months']}개월간 누적된 {r['kr']} {city['kr']} 권역 배차 로그를 동(洞) 단위로 집계한 1차 데이터입니다.</p>
+  <p>교통 상황·시간대에 따라 실제 도착 시간은 달라질 수 있으며, 예약 시 예상 시간을 다시 안내드립니다.</p>
+  <p class="src">출처: 마톡 본사 디스패치 로그 · {esc(city['kr'])} {esc(g['kr'])} 집계(2025.10–2026.05). 분기별 갱신.</p>
+  <p class="src">작성 <a href="/about/" style="color:var(--rose)">마톡 편집팀</a> · 감수 박지연(안전 자문 트레이너) · 최종 갱신 2026-05</p>
+</div></section>"""
+
+    html += f'<section class="wrap cv" style="padding-top:0">{section_head("PRICING", "코스 요금")}{price_grid(D.SERVICES)}</section>'
+
+    rev_cards = "".join(
+        f'<div class="review reveal"><div class="stars">{"★"*rv["rating"]}{"☆"*(5-rv["rating"])}</div>'
+        f'<p>{esc(rv["body"])}</p><div class="who">{esc(rv["who"])}</div></div>' for rv in revs)
+    rv_head = section_head("REVIEWS", f"{g['kr']} 이용 후기")
+    html += f'<section class="wrap cv" style="padding-top:0">{rv_head}<div class="grid g3">{rev_cards}</div></section>'
+
+    faq_head = section_head("FAQ", f"{g['kr']} 자주 묻는 질문")
+    html += f'<section class="wrap cv" style="padding-top:0">{faq_head}{faq_block(faq)}</section>'
+    html += cta_band(f"{city['kr']} {g['kr']}, 가장 가까운 관리사를 배차해 드립니다")
     html += footer()
     return (path + "index.html", html)
 
