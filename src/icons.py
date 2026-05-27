@@ -33,27 +33,49 @@ def _seg_dist(px, py, ax, ay, bx, by):
     return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
 
 
-def _in_monogram(fx, fy):
-    """프랙션 좌표(0~1)가 'M' 모노그램 획 안에 있는지."""
-    left, right, top, bot = 0.32, 0.68, 0.35, 0.65
-    vx, vy = 0.50, 0.55          # 가운데 V 꼭짓점
-    hw = 0.052                   # 획 반폭
-    segs = (
-        (left, top, left, bot),      # 왼쪽 세로
-        (right, top, right, bot),     # 오른쪽 세로
-        (left, top, vx, vy),          # 왼쪽 사선
-        (right, top, vx, vy),         # 오른쪽 사선
-    )
-    return any(_seg_dist(fx, fy, *s) <= hw for s in segs)
+# 말풍선 본체(라운드 사각형) 파라미터 — 프랙션 좌표(0~1)
+_B_CX, _B_CY = 0.50, 0.435
+_B_HW, _B_HH = 0.270, 0.175
+_B_CR = 0.105
+# 꼬리 삼각형 (왼쪽 아래로 향함)
+_TAIL = ((0.345, 0.575), (0.315, 0.745), (0.475, 0.595))
+# 타이핑 점 3개
+_DOTS = ((0.355, 0.435), (0.500, 0.435), (0.645, 0.435))
+_DOT_R = 0.044
+
+
+def _rrect_inside(fx, fy):
+    dx = abs(fx - _B_CX) - (_B_HW - _B_CR)
+    dy = abs(fy - _B_CY) - (_B_HH - _B_CR)
+    qx, qy = max(dx, 0.0), max(dy, 0.0)
+    return math.hypot(qx, qy) + min(max(dx, dy), 0.0) - _B_CR <= 0.0
+
+
+def _tri_inside(fx, fy):
+    (ax, ay), (bx, by), (cx_, cy_) = _TAIL
+    d1 = (fx - bx) * (ay - by) - (ax - bx) * (fy - by)
+    d2 = (fx - cx_) * (by - cy_) - (bx - cx_) * (fy - cy_)
+    d3 = (fx - ax) * (cy_ - ay) - (cx_ - ax) * (fy - ay)
+    neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
+    pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
+    return not (neg and pos)
+
+
+def _in_bubble(fx, fy):
+    return _rrect_inside(fx, fy) or _tri_inside(fx, fy)
+
+
+def _in_dot(fx, fy):
+    return any(math.hypot(fx - dx, fy - dy) <= _DOT_R for dx, dy in _DOTS)
 
 
 def _render(size, *, maskable=False):
-    """RGBA 바이트 생성. 라운드 다크 배경 위 그라데이션 원 + 다크 M 모노그램."""
+    """RGBA 바이트 생성. 라운드 다크 배경 위 로즈골드 말풍선 + 다크 타이핑 점 3개."""
     px = bytearray()
     cx = cy = size / 2
-    r_circle = size * (0.46 if maskable else 0.40)
+    r_norm = size * 0.40            # 그라데이션 정규화 반경
     radius_bg = size * 0.22
-    hx, hy = size * 0.36, size * 0.30  # specular 하이라이트 중심
+    hx, hy = size * 0.36, size * 0.28  # specular 하이라이트 중심
     for y in range(size):
         row = bytearray([0])  # filter type 0
         for x in range(size):
@@ -66,10 +88,10 @@ def _render(size, *, maskable=False):
             if not inside_bg:
                 row += bytes([0, 0, 0, 0])
                 continue
-            dist = math.hypot(x + 0.5 - cx, y + 0.5 - cy)
             fx, fy = (x + 0.5) / size, (y + 0.5) / size
-            if dist <= r_circle and not _in_monogram(fx, fy):
-                t = dist / r_circle
+            if _in_bubble(fx, fy) and not _in_dot(fx, fy):
+                dist = math.hypot(x + 0.5 - cx, y + 0.5 - cy)
+                t = min(1.0, dist / r_norm)
                 col = list(_grad(t))
                 hd = math.hypot(x - hx, y - hy)
                 hl = max(0.0, 1 - hd / (size * 0.4))
