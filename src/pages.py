@@ -6,7 +6,7 @@ from . import gen
 from .components import (
     head, header, footer, esc, jsonld, note_cards, price_grid, faq_block, faq_jsonld,
     breadcrumb, breadcrumb_jsonld, cta_band, section_head, org_jsonld, website_jsonld,
-    localbusiness_jsonld,
+    localbusiness_jsonld, link_cluster, agg_rating, review_section, review_nodes,
 )
 
 S = C.STATS
@@ -90,7 +90,7 @@ def build_index():
         f"{C.BRAND} 출장마사지 — 서울·경기·인천·부산 전 권역 24시간 배차. 평균 {S['avg_arrival_min']}분 도착, 확정 금액 그대로.",
         "/", jsonld_blocks=blocks, prefetch=["/pricing/", "/locations/"],
         extra_meta=(
-            '<meta name="naver-site-verification" content="30363baba6fc86ad2bb4e417ae432a7accb60d1e">'
+            '<meta name="naver-site-verification" content="c65fdf0e03d905da1bdf575de0126070461862ed">'
             '<meta name="google-site-verification" content="eBesLq6H_j5MQTaHNfknYR_4H1-7UuHkG2ohfTSRX6o">'
         ),
     )
@@ -129,6 +129,19 @@ def build_index():
 
     html += f"""<section class="wrap cv" id="region" style="padding-top:0">{section_head('SERVICE AREA','서울·경기·인천·부산 전 권역','광역 허브에서 원하는 시·군·구를 선택하세요.')}
 <div class="grid g4">{region_cards}</div></section>"""
+
+    # 롱테일 내부링크 클러스터 — 메인에서 코스·권역·인기 지역·관리사 딥페이지로 직접 연결
+    pop_districts = [(f"{d['kr']} 출장마사지", f"/locations/{r['slug']}/{d['slug']}/")
+                     for r in D.REGIONS for d in r["districts"][:5]]
+    html += link_cluster(
+        "POPULAR TOPICS", "지역·코스별 바로가기",
+        [
+            ("코스별 출장마사지", [(f"{s['name']} 출장마사지", f"/service/{s['slug']}/") for s in D.SERVICES]),
+            ("권역별 출장마사지", [(f"{r['kr']} 출장마사지", f"/locations/{r['slug']}/") for r in D.REGIONS]),
+            ("인기 지역 출장마사지", pop_districts),
+            ("국적별 관리사", [(f"{t['name']}인 관리사", f"/therapists/{t['slug']}/") for t in D.THERAPISTS]),
+        ],
+        sub="찾으시는 지역·코스·관리사를 바로 선택하세요. 서울·경기·인천·부산 전 권역으로 연결됩니다.")
 
     html += f"""<section class="wrap cv" id="process" style="padding-top:0">{section_head('HOW IT WORKS','예약은 네 단계로 끝납니다')}
 <div class="steps">{steps}</div></section>"""
@@ -213,12 +226,16 @@ def build_services():
             ("압 조절이 가능한가요?", "예. 코스 시작 전과 진행 중 모두 압과 부위를 조율할 수 있습니다."),
             ("출장 지역은 어디까지 되나요?", "서울·경기·인천·부산 전 권역에 24시간 배차합니다."),
         ]
+        revs = gen.make_reviews("svc:" + s["slug"], course=s["name"], n=6)
+        rcount = gen.agg_count("svc:" + s["slug"])
         blocks = [
             breadcrumb_jsonld(trail), faq_jsonld(faq),
             jsonld({"@context": "https://schema.org", "@type": "Service",
                     "name": f"{s['name']} 출장마사지", "serviceType": s["name"],
                     "provider": {"@id": C.DOMAIN + "/#org"},
                     "areaServed": "서울·경기·인천·부산", "description": s["summary"],
+                    "aggregateRating": agg_rating(count=rcount),
+                    "review": review_nodes(revs),
                     "offers": [{"@type": "Offer", "name": f"{s['name']} {t}", "price": p.replace(",", "").replace("원", ""),
                                 "priceCurrency": "KRW"} for t, p in s["prices"]]}),
         ]
@@ -239,7 +256,15 @@ def build_services():
         html += f'<section class="wrap cv" style="padding-top:0">{section_head("DEEP DIVE","진행과 안전")}{deep}</section>'
         price_title = section_head("PRICING", f"{s['name']} 요금")
         html += f'<section class="wrap cv" style="padding-top:0">{price_title}{price_grid([s])}</section>'
+        html += review_section("REVIEWS", f"{s['name']} 코스 후기 · 평점 {S['rating']}", revs)
         html += f'<section class="wrap cv" style="padding-top:0">{section_head("FAQ","자주 묻는 질문")}{faq_block(faq)}</section>'
+        html += link_cluster(
+            "EXPLORE MORE", "다른 코스·지역 둘러보기",
+            [
+                ("다른 코스", [(f"{o['name']} 출장마사지", f"/service/{o['slug']}/") for o in D.SERVICES if o["slug"] != s["slug"]]),
+                ("권역별 출장마사지", [(f"{r['kr']} 출장마사지", f"/locations/{r['slug']}/") for r in D.REGIONS]),
+                ("국적별 관리사", [(f"{t['name']}인 관리사", f"/therapists/{t['slug']}/") for t in D.THERAPISTS]),
+            ])
         html += cta_band()
         html += footer()
         out.append((f"/service/{s['slug']}/index.html", html))
@@ -291,7 +316,15 @@ def build_therapists():
             ("의사소통은 괜찮나요?", t["detail"][-1] if "한국어" in t["detail"][-1] else "기본 응대가 가능하며, 세부 요청은 디스패처가 사전 전달합니다."),
             ("어떤 코스와 잘 맞나요?", t["detail"][0]),
         ]
-        blocks = [breadcrumb_jsonld(trail), faq_jsonld(faq)]
+        revs = gen.make_reviews("ther:" + t["slug"], n=6)
+        rcount = gen.agg_count("ther:" + t["slug"])
+        blocks = [breadcrumb_jsonld(trail), faq_jsonld(faq),
+                  jsonld({"@context": "https://schema.org", "@type": "Service",
+                          "name": f"{t['name']}인 관리사 출장마사지", "serviceType": "출장 건강관리",
+                          "provider": {"@id": C.DOMAIN + "/#org"},
+                          "areaServed": "서울·경기·인천·부산", "description": t["desc"],
+                          "aggregateRating": agg_rating(count=rcount),
+                          "review": review_nodes(revs)})]
         html = head(f"{t['name']}인 관리사 안내 — 강점·매칭 | 마톡 출장마사지",
                     f"{t['name']}인 관리사 안내. {t['desc']} 코스별 매칭 기준을 확인하세요.",
                     f"/therapists/{t['slug']}/", jsonld_blocks=blocks)
@@ -301,7 +334,15 @@ def build_therapists():
 <h1>{esc(t['name'])}인 <span class="grad">관리사</span></h1>
 <p class="lead">{esc(t['desc'])}</p></div></section>"""
         html += f'<section class="wrap cv">{section_head("OVERVIEW","강점과 매칭")}{notes}</section>'
+        html += review_section("REVIEWS", f"{t['name']}인 관리사 후기 · 평점 {S['rating']}", revs)
         html += f'<section class="wrap cv" style="padding-top:0">{section_head("FAQ","자주 묻는 질문")}{faq_block(faq)}</section>'
+        html += link_cluster(
+            "EXPLORE MORE", "코스·지역·다른 관리사",
+            [
+                ("코스별 출장마사지", [(f"{s['name']} 출장마사지", f"/service/{s['slug']}/") for s in D.SERVICES]),
+                ("권역별 출장마사지", [(f"{r['kr']} 출장마사지", f"/locations/{r['slug']}/") for r in D.REGIONS]),
+                ("다른 국적 관리사", [(f"{o['name']}인 관리사", f"/therapists/{o['slug']}/") for o in D.THERAPISTS if o["slug"] != t["slug"]]),
+            ])
         html += cta_band()
         html += footer()
         out.append((f"/therapists/{t['slug']}/index.html", html))

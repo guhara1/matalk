@@ -33,8 +33,8 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://pacifichealthoptions.com/sitemap.xml
-Sitemap: https://pacifichealthoptions.com/sitemap1.xml
-Sitemap: https://pacifichealthoptions.com/sitemap_01.xml
-Sitemap: https://pacifichealthoptions.com/rss.xml
-Host: pacifichealthoptions.com
+Sitemap: https://matalk.netlify.app/sitemap.xml
+Sitemap: https://matalk.netlify.app/sitemap1.xml
+Sitemap: https://matalk.netlify.app/sitemap_01.xml
+Sitemap: https://matalk.netlify.app/rss.xml
+Host: matalk.netlify.app

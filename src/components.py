@@ -216,6 +216,16 @@ details>div{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:
 /* CONTENT VISIBILITY */
 .cv{content-visibility:auto;contain-intrinsic-size:auto 700px}
 
+/* INTERNAL LINK CLUSTERS (long-tail) */
+.lclusters{display:flex;flex-direction:column;gap:26px}
+.lgroup-h{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:800;margin-bottom:13px}
+.lpills{display:flex;flex-wrap:wrap;gap:10px}
+.lpill{display:inline-flex;align-items:center;gap:5px;padding:9px 15px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--line);font-size:13.5px;color:var(--muted);transition:.2s;line-height:1.3}
+.lpill::before{content:"#";color:var(--copper);font-weight:800}
+.lpill:hover{border-color:rgba(244,210,156,.42);color:var(--text);background:var(--grad-soft);transform:translateY(-1px)}
+.lpill b{font-weight:700;color:var(--text)}
+
 @media(max-width:1100px){
   .toggle{display:block}
   .menu{position:fixed;inset:64px 0 auto 0;flex-direction:column;align-items:stretch;gap:0;
@@ -478,6 +488,45 @@ def section_head(eyebrow, title, sub=None):
     s = f"<p>{esc(sub)}</p>" if sub else ""
     return (f'<div class="section-head reveal"><span class="eyebrow"><span class="pulse"></span>{esc(eyebrow)}</span>'
             f'<h2>{esc(title)}</h2>{s}</div>')
+
+
+def link_cluster(eyebrow, title, groups, sub=None):
+    """롱테일 내부링크 클러스터. groups = [(그룹명, [(라벨, href), ...]), ...]."""
+    blocks = []
+    for label, items in groups:
+        if not items:
+            continue
+        pills = "".join(f'<a class="lpill" href="{href}">{esc(text)}</a>' for text, href in items)
+        blocks.append(f'<div class="lgroup"><div class="lgroup-h">{esc(label)}</div><div class="lpills">{pills}</div></div>')
+    if not blocks:
+        return ""
+    return (f'<section class="wrap cv" style="padding-top:0">{section_head(eyebrow, title, sub)}'
+            f'<div class="lclusters">{"".join(blocks)}</div></section>')
+
+
+def agg_rating(rating=None, count=None):
+    """AggregateRating 노드. 점수·후기수를 받아 schema.org 딕셔너리로."""
+    return {"@type": "AggregateRating", "ratingValue": str(rating or C.STATS["rating"]),
+            "reviewCount": int(count or C.STATS["review_count"]), "bestRating": "5", "worstRating": "1"}
+
+
+def review_section(eyebrow, title, revs, *, with_region=False):
+    """가시적 후기 카드 섹션 HTML."""
+    cards = "".join(
+        f'<div class="review reveal"><div class="stars">{"★"*rv["rating"]}{"☆"*(5-rv["rating"])}</div>'
+        f'<p>{esc(rv["body"])}</p>'
+        f'<div class="who">{esc((rv.get("region","")+" ") if with_region else "")}{esc(rv["who"])}</div></div>'
+        for rv in revs)
+    return (f'<section class="wrap cv" style="padding-top:0">{section_head(eyebrow, title)}'
+            f'<div class="grid g3">{cards}</div></section>')
+
+
+def review_nodes(revs):
+    """Review schema 노드 리스트."""
+    return [{"@type": "Review", "author": {"@type": "Person", "name": rv["author"]},
+             "datePublished": rv.get("date", "2026-04-01"),
+             "reviewRating": {"@type": "Rating", "ratingValue": rv["rating"], "bestRating": "5"},
+             "reviewBody": rv["body"]} for rv in revs]
 
 
 # ─────────────────────────────────────────────
