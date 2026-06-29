@@ -1,0 +1,6 @@
+# Netlify 배포 설정
+# dist/ 에 이미 빌드된 정적 사이트가 들어 있으므로, 빌드 없이 dist 를 그대로 게시한다.
+
+[build]
+  publish = "dist"
+  command = ""
