@@ -244,6 +244,7 @@ def main():
         "rss.xml": rss_xml(),
         "site.webmanifest": webmanifest(),
         "favicon.svg": favicon_svg(),
+        C.NAVER_VERIFY_FILENAME: C.NAVER_VERIFY_CONTENT,  # 네이버 HTML 파일 소유확인
     }
     for name, content in extra.items():
         with open(os.path.join(OUT, name), "w", encoding="utf-8") as f:
