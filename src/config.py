@@ -58,3 +58,7 @@ TEAM = [
 ]
 
 AUTHOR = "마톡 편집팀"
+
+# 네이버 사이트 소유확인 — HTML 파일 방식 (루트에 그대로 서빙)
+NAVER_VERIFY_FILENAME = "naver68be76df5230847bd9dbd542517f65c4.html"
+NAVER_VERIFY_CONTENT = "naver-site-verification: naver68be76df5230847bd9dbd542517f65c4.html"
