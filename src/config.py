@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """사이트 전역 설정. 도메인 연결 시 이 파일만 수정하면 됩니다."""
 
-DOMAIN = "https://pacifichealthoptions.com"
+DOMAIN = "https://matalk.netlify.app"
 
 BRAND = "마톡"
 BRAND_FULL = "마톡 출장마사지"

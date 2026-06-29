@@ -184,6 +184,31 @@ _NICKS = ["김O준", "이O연", "박O현", "최O서", "정O우", "강O민", "윤
 _COURSES = ["스웨디시", "아로마", "타이", "로미로미", "스포츠"]
 
 
+_GEN_AREAS = ["강남", "마포", "분당", "해운대", "송도", "서면", "수원", "일산", "송파",
+              "부산진", "용인", "청라", "광안리", "위례", "동탄", "잠실"]
+
+
+def make_reviews(seed_key, *, area=None, course=None, n=4):
+    """서비스·관리사 등 비(非)행정구 페이지용 후기 생성기. area/course 고정 가능."""
+    out = []
+    for i in range(n):
+        sd = _seed(seed_key + ":" + str(i))
+        tmpl, who = _REVIEW_BANK[sd % len(_REVIEW_BANK)]
+        a = area or _GEN_AREAS[sd % len(_GEN_AREAS)]
+        c = course or _COURSES[(sd >> 2) % len(_COURSES)]
+        nick = _NICKS[(sd >> 4) % len(_NICKS)]
+        mins = 25 + (sd >> 6) % 20
+        rating = 5 if sd % 6 else 4
+        out.append({"body": tmpl.format(course=c, area=a, min=mins, nick=nick),
+                    "who": who.format(area=a, nick=nick), "rating": rating, "author": nick})
+    return out
+
+
+def agg_count(seed_key, base=120, span=260):
+    """페이지별 결정론적 후기 수 (점수 신뢰도 표기용)."""
+    return base + _seed(seed_key) % span
+
+
 def reviews(district, n=6):
     out = []
     areas = district["areas"]

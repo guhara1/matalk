@@ -6,7 +6,14 @@ from . import gen
 from .components import (
     head, header, footer, esc, jsonld, note_cards, price_grid, faq_block, faq_jsonld,
     breadcrumb, breadcrumb_jsonld, cta_band, section_head, org_jsonld, localbusiness_jsonld,
+    link_cluster,
 )
+
+
+def _course_links(area_kr=None):
+    """코스별 롱테일 링크. area_kr 지정 시 '강남구 스웨디시' 식 앵커."""
+    pre = f"{area_kr} " if area_kr else ""
+    return [(f"{pre}{s['name']} 출장마사지", f"/service/{s['slug']}/") for s in D.SERVICES]
 
 S = C.STATS
 
@@ -110,6 +117,13 @@ def build_region_hubs():
         dist_head = section_head("DISTRICTS", f"{r['kr']} {r['label']}")
         html += f'<section class="wrap cv">{dist_head}<div class="grid g3">{cards}</div></section>'
         html += f'<section class="wrap cv" style="padding-top:0">{notes}</section>'
+        html += link_cluster(
+            "EXPLORE MORE", f"{r['kr']} 코스·다른 권역·관리사",
+            [
+                ("코스별 출장마사지", _course_links(r["kr"])),
+                ("다른 권역", [(f"{o['kr']} 출장마사지", f"/locations/{o['slug']}/") for o in D.REGIONS if o["slug"] != r["slug"]]),
+                ("국적별 관리사", [(f"{t['name']}인 관리사", f"/therapists/{t['slug']}/") for t in D.THERAPISTS]),
+            ])
         html += cta_band()
         html += footer()
         out.append((f"/locations/{r['slug']}/index.html", html))
@@ -225,6 +239,18 @@ def _district_page(r, d):
 
     faq_head = section_head("FAQ", f"{d['kr']} 자주 묻는 질문")
     html += f'<section class="wrap cv" style="padding-top:0">{faq_head}{faq_block(faq)}</section>'
+
+    siblings = [(f"{o['kr']} 출장마사지", f"/locations/{r['slug']}/{o['slug']}/")
+                for o in r["districts"] if o["slug"] != d["slug"]][:16]
+    html += link_cluster(
+        "NEARBY & COURSES", f"{r['kr']} 다른 지역 · {d['kr']} 코스 안내",
+        [
+            ("같은 권역 다른 지역", siblings),
+            (f"{d['kr']} 코스별 안내", _course_links(d["kr"])),
+            ("국적별 관리사", [(f"{t['name']}인 관리사", f"/therapists/{t['slug']}/") for t in D.THERAPISTS]),
+        ],
+        sub=f"{d['kr']} 인근 지역과 코스별 안내로 바로 이동할 수 있습니다.")
+
     html += cta_band(f"{d['kr']}, 가장 가까운 관리사를 배차해 드립니다")
     html += footer()
     return (f"/locations/{r['slug']}/{d['slug']}/index.html", html)
@@ -341,6 +367,27 @@ def _dong_page(r, d, dg, gu=None):
 
     faq_head = section_head("FAQ", f"{dg['kr']} 자주 묻는 질문")
     html += f'<section class="wrap cv" style="padding-top:0">{faq_head}{faq_block(faq)}</section>'
+
+    district_path = f"/locations/{r['slug']}/{d['slug']}/"
+    if gu:
+        sib_pool, sib_base = gu["dongs"], base
+        parent = [(f"{gu['kr']} 전체", base), (f"{d['kr']} 출장마사지", district_path),
+                  (f"{r['kr']} 출장마사지", f"/locations/{r['slug']}/")]
+        sib_label = f"{gu['kr']} 다른 동"
+    else:
+        sib_pool, sib_base = (D.DONGS.get(d["slug"]) or []), district_path
+        parent = [(f"{d['kr']} 출장마사지", district_path), (f"{r['kr']} 출장마사지", f"/locations/{r['slug']}/")]
+        sib_label = f"{d['kr']} 다른 동"
+    sib_links = [(f"{o['kr']} 출장마사지", sib_base + f"{o['slug']}/")
+                 for o in sib_pool if o["slug"] != dg["slug"]][:16]
+    html += link_cluster(
+        "NEARBY & COURSES", f"{dg['kr']} 인근 동 · 코스 안내",
+        [
+            (sib_label, sib_links),
+            (f"{dg['kr']} 코스별 안내", _course_links(dg["kr"])),
+            ("상위 지역·권역", parent),
+        ])
+
     html += cta_band(f"{dg['kr']}, 가장 가까운 관리사를 배차해 드립니다")
     html += footer()
     return (path + "index.html", html)
@@ -449,6 +496,18 @@ def _gu_page(r, city, g):
 
     faq_head = section_head("FAQ", f"{g['kr']} 자주 묻는 질문")
     html += f'<section class="wrap cv" style="padding-top:0">{faq_head}{faq_block(faq)}</section>'
+
+    gu_sibs = [(f"{o['kr']} 출장마사지", f"/locations/{r['slug']}/{city['slug']}/{o['slug']}/")
+               for o in D.GYEONGGI_GU.get(city["slug"], []) if o["slug"] != g["slug"]][:16]
+    html += link_cluster(
+        "NEARBY & COURSES", f"{city['kr']} 다른 구 · {g['kr']} 코스 안내",
+        [
+            (f"{city['kr']} 다른 구", gu_sibs),
+            (f"{g['kr']} 코스별 안내", _course_links(g["kr"])),
+            ("상위 지역·권역", [(f"{city['kr']} 출장마사지", f"/locations/{r['slug']}/{city['slug']}/"),
+                          (f"{r['kr']} 출장마사지", f"/locations/{r['slug']}/")]),
+        ])
+
     html += cta_band(f"{city['kr']} {g['kr']}, 가장 가까운 관리사를 배차해 드립니다")
     html += footer()
     return (path + "index.html", html)
