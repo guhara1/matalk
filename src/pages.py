@@ -90,7 +90,7 @@ def build_index():
         f"{C.BRAND} 출장마사지 — 서울·경기·인천·부산 전 권역 24시간 배차. 평균 {S['avg_arrival_min']}분 도착, 확정 금액 그대로.",
         "/", jsonld_blocks=blocks, prefetch=["/pricing/", "/locations/"],
         extra_meta=(
-            '<meta name="naver-site-verification" content="c65fdf0e03d905da1bdf575de0126070461862ed">'
+            '<meta name="naver-site-verification" content="41f6f88d3a041d7e5960260388c2dcae2ce5c04d">'
             '<meta name="google-site-verification" content="eBesLq6H_j5MQTaHNfknYR_4H1-7UuHkG2ohfTSRX6o">'
         ),
     )
